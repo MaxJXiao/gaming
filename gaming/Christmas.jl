@@ -1,4 +1,4 @@
-# cd("/home/max/gaming")
+# cd("/home/max/project/gaming")
 # using GameZero
 # using Colors
 
