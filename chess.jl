@@ -91,6 +91,109 @@ function piece_identifier()
     
 end
 
+"""
+piece_interception()
+
+Figure out the squares that can intercept the movement
+"""
+function piece_interception(rank,col,og_rank,og_col)
+    if rank != og_rank && col != og_col
+        s_rank = []
+
+        if rank > og_rank
+            append!(s_rank, rank:-1:og_rank)
+        elseif og_rank > rank
+            append!(s_rank, rank:og_rank)
+        end
+
+        s_col = []
+
+        if col > og_col
+            append!(s_col, col:-1:og_col)
+        elseif og_col > col
+            append!(s_col, col:og_col)
+        end
+
+
+        indices = []
+
+        l = length(s_rank)
+        if l > 2
+            for i ∈ 2:l-1 
+                append!(indices, [[s_rank[i], s_col[i]]])
+            end
+        end
+
+    elseif rank != og_rank && col == og_col
+        s_rank = []
+        if abs(rank - og_rank) > 1
+            if rank > og_rank
+                i_rank = rank:-1:og_rank
+                append!(s_rank, i_rank[2:end-1])
+            else
+                i_rank = rank:og_rank
+                append!(s_rank, i_rank[2:end-1])
+            end
+        end
+        
+        indices = []
+
+        l = length(s_rank)
+        if l != 0
+            for i ∈ 1:l 
+                append!(indices, [[s_rank[i], col]])
+            end
+        end
+
+    elseif col != og_col && rank == og_rank
+        s_col = []
+        if abs(col - og_col) > 1
+            if col > og_col
+                i_col = col:-1:og_col
+                append!(s_col, i_col[2:end-1])
+            else
+                i_col = col:og_col
+                append!(s_col, i_col[2:end-1])
+            end
+        end
+        
+        indices = []
+
+        l = length(s_col)
+        if l != 0
+            for i ∈ 1:l 
+                append!(indices, [[rank, s_col[i]]])
+            end
+        end
+
+    end
+
+    return indices
+end
+
+"""
+line_of_sight()
+
+See if black or white can block the movement
+"""
+function line_of_sight(cept::Vector{Any})
+    l = length(cept)
+    count = 0
+    if l != 0
+
+        for i ∈ 1:l 
+            if white[cept[i][1],cept[i][2]] != "" || black[cept[i][1],cept[i][2]] != ""
+                count += 1
+                break
+            end
+
+        end
+    end
+
+    return count
+    
+end
+
 
 """
 white_pawn()
@@ -283,6 +386,7 @@ function white_knight(move::String)
             if white[i[1], i[2]] == "N" && black[rank, col] == "" && white[rank, col] == ""
                 white[i[1], i[2]] = ""
                 white[rank, col] = "N"
+                break
             end
         end
 
@@ -297,6 +401,7 @@ function white_knight(move::String)
                     white[i[1], i[2]] = ""
                     white[rank, col] = "N"
                     black[rank, col] = ""
+                    break
                 end
 
             end
@@ -312,6 +417,7 @@ function white_knight(move::String)
                     white[rank, col] == "" && black[rank, col] == ""
                         white[i[1], i[2]] = ""
                         white[rank, col] = "N"
+                        break
                 end
             end
 
@@ -326,6 +432,7 @@ function white_knight(move::String)
                     white[rank, col] == "" && black[rank, col] == ""
                         white[i[1], i[2]] = ""
                         white[rank, col] = "N"
+                        break
                 end
             end
 
@@ -345,6 +452,7 @@ function white_knight(move::String)
                             white[i[1], i[2]] = ""
                             white[rank, col] = "N"
                             black[rank, col] = ""
+                            break
                     end
                 end
 
@@ -360,6 +468,7 @@ function white_knight(move::String)
                             white[i[1], i[2]] = ""
                             white[rank, col] = "N"
                             black[rank, col] = ""
+                            break
                     end
                 end
                     
@@ -420,6 +529,7 @@ function black_knight(move::String)
             if black[i[1], i[2]] == "N" && white[rank, col] == "" && black[rank, col] == ""
                 black[i[1], i[2]] = ""
                 black[rank, col] = "N"
+                break
             end
         end
 
@@ -434,6 +544,7 @@ function black_knight(move::String)
                     black[i[1], i[2]] = ""
                     black[rank, col] = "N"
                     white[rank, col] = ""
+                    break
                 end
 
             end
@@ -449,6 +560,7 @@ function black_knight(move::String)
                     black[rank, col] == "" && white[rank, col] == ""
                         black[i[1], i[2]] = ""
                         black[rank, col] = "N"
+                        break
                 end
             end
 
@@ -463,6 +575,7 @@ function black_knight(move::String)
                     black[rank, col] == "" && white[rank, col] == ""
                         black[i[1], i[2]] = ""
                         black[rank, col] = "N"
+                        break
                 end
             end
 
@@ -482,6 +595,7 @@ function black_knight(move::String)
                             black[i[1], i[2]] = ""
                             black[rank, col] = "N"
                             white[rank, col] = ""
+                            break
                     end
                 end
 
@@ -497,6 +611,7 @@ function black_knight(move::String)
                             black[i[1], i[2]] = ""
                             black[rank, col] = "N"
                             white[rank, col] = ""
+                            break
                     end
                 end
                     
@@ -544,7 +659,7 @@ knight_surround()
 
 find all the spots the knight could jump into the square from
 """
-function knight_surround(rank,col)
+function knight_surround(rank, col)
     s_rank = []
     c_rank = []
     s_col = []
@@ -602,6 +717,368 @@ function knight_surround(rank,col)
 
 end
 
+
+"""
+white_bisharp()
+
+Move the white bisharp.
+"""
+function white_bisharp(move::String)
+    splitter = split(move, "")
+
+    l = length(move)
+
+    if l == 3
+        col = convert_file(splitter[2])
+        rank = 9 - parse(Int, splitter[3])
+
+        for i ∈ bisharp_surround(rank, col)
+            if white[i[1], i[2]] == "B" && black[rank, col] == "" && white[rank, col] == ""
+
+                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[i[1], i[2]] = ""
+                    white[rank, col] = "B"
+                    break
+                end
+
+            end
+        end
+
+    elseif l == 4
+
+        if splitter[2] == "x"
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ bisharp_surround(rank,col)
+                if white[i[1], i[2]] == "B" && black[rank, col] != "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "B"
+                        black[rank, col] = ""
+                        break
+                    end
+                end
+
+            end
+        
+        elseif splitter[2] ∈ files # Nbd2
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int,splitter[4])
+
+            for i ∈ bisharp_surround(rank, col)
+                if white[i[1], i[2]] == "B" && i[2] == og_col &&
+                    white[rank, col] == "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "B"
+                        break
+                    end
+                end
+            end
+
+        elseif splitter[2] ∈ numbers # N3d4
+            og_rank = 9 - parse(Int, splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ bisharp_surround(rank, col)
+                if white[i[1], i[2]] == "B" && i[1] == og_rank &&
+                    white[rank, col] == "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "B"
+                        break
+                    end
+                end
+            end
+
+        end
+
+    elseif l == 5
+        if splitter[3] == "x"
+            if splitter[2] ∈ files # Ncxe5
+                og_col = convert_file(splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ bisharp_surround(rank, col)
+                    if white[i[1], i[2]] == "B" && i[2] == og_col &&
+                        white[rank, col] == "" && black[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "B"
+                            black[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+
+            elseif splitter[2] ∈ numbers # N3xd4
+                og_rank = 9 - parse(Int, splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ bisharp_surround(rank, col)
+                    if white[i[1], i[2]] == "B" && i[1] == og_rank &&
+                        white[rank, col] == "" && black[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "B"
+                            black[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+                    
+
+            end
+
+        elseif splitter[3] ∈ numbers # Nf2d3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[4])
+            rank = 9 - parse(Int, splitter[5])
+
+            if white[og_rank, og_col] == "B" && white[rank, col] == "" &&
+                black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    white[og_rank, og_col] = ""
+                    white[rank, col] = "B"
+                    
+                end
+            end
+            
+        end
+
+    elseif l == 6
+        if splitter[4] == "x" # Nf2xd3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[5])
+            rank = 9 - parse(Int, splitter[6])
+
+            if white[og_rank, og_col] == "B" && black[rank, col] != "" &&
+                white[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    white[og_rank, og_col] = ""
+                    white[rank, col] = "B"
+                    black[rank, col] = ""
+                end
+            end
+
+        end
+    end
+
+end
+
+"""
+black_bisharp()
+
+Move the black bisharp.
+"""
+function black_bisharp(move::String)
+    splitter = split(move, "")
+
+    l = length(move)
+
+    if l == 3
+        col = convert_file(splitter[2])
+        rank = 9 - parse(Int, splitter[3])
+
+        for i ∈ bisharp_surround(rank, col)
+            if black[i[1], i[2]] == "B" && white[rank, col] == "" && black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                    black[i[1], i[2]] = ""
+                    black[rank, col] = "B"
+                    break
+                end
+            end
+        end
+
+    elseif l == 4
+
+        if splitter[2] == "x"
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ bisharp_surround(rank,col)
+                if black[i[1], i[2]] == "B" && white[rank, col] != "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "B"
+                        white[rank, col] = ""
+                        break
+                    end
+                end
+
+            end
+        
+        elseif splitter[2] ∈ files # Nbd2
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int,splitter[4])
+
+            for i ∈ bisharp_surround(rank, col)
+                if black[i[1], i[2]] == "B" && i[2] == og_col &&
+                    black[rank, col] == "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "B"
+                        break
+                    end
+                end
+            end
+
+        elseif splitter[2] ∈ numbers # N3d4
+            og_rank = 9 - parse(Int, splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ bisharp_surround(rank, col)
+                if black[i[1], i[2]] == "B" && i[1] == og_rank &&
+                    black[rank, col] == "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "B"
+                        break
+                    end
+                end
+            end
+
+        end
+
+    elseif l == 5
+        if splitter[3] == "x"
+            if splitter[2] ∈ files # Ncxe5
+                og_col = convert_file(splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ bisharp_surround(rank, col)
+                    if black[i[1], i[2]] == "B" && i[2] == og_col &&
+                        black[rank, col] == "" && white[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "B"
+                            white[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+
+            elseif splitter[2] ∈ numbers # N3xd4
+                og_rank = 9 - parse(Int, splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ bisharp_surround(rank, col)
+                    if black[i[1], i[2]] == "B" && i[1] == og_rank &&
+                        black[rank, col] == "" && white[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "B"
+                            white[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+                    
+
+            end
+
+        elseif splitter[3] ∈ numbers # Nf2d3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[4])
+            rank = 9 - parse(Int, splitter[5])
+
+            if black[og_rank, og_col] == "B" && black[rank, col] == "" &&
+                white[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    black[og_rank, og_col] = ""
+                    black[rank, col] = "B"
+                end
+            end
+            
+        end
+
+    elseif l == 6
+        if splitter[4] == "x" # Nf2xd3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[5])
+            rank = 9 - parse(Int, splitter[6])
+
+            if black[og_rank, og_col] == "B" && white[rank, col] != "" &&
+                black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    black[og_rank, og_col] = ""
+                    black[rank, col] = "B"
+                    white[rank, col] = ""
+                end
+            end
+
+        end
+    end
+
+end
+
+"""
+bisharp_surround()
+
+find all spots the bisharp could into the square from
+"""
+function bisharp_surround(rank, col)
+    indices = []
+
+    for i ∈ 1:7
+        if rank - i > 0.5 && col - i > 0.5
+            append!(indices, [[rank - i, col - i]])
+        end
+        if rank - i > 0.5 && col + i < 8.5
+            append!(indices, [[rank - i, col + i]])
+        end
+        if rank + i < 8.5 && col - i > 0.5
+            append!(indices, [[rank + i, col - i]])
+        end
+        if rank + i < 8.5 && col + i < 8.5
+            append!(indices, [[rank + i, col + i]])
+        end
+    end
+
+    return indices
+    
+end
+
+
 """
 white_king()
 
@@ -621,6 +1098,7 @@ function white_king(move::String)
             if white[i[1],i[2]] == "K" && black[rank, col] == "" && white[rank, col] == ""
                 white[i[1], i[2]] = ""
                 white[rank,col] = "K"
+                break
             end
         end
     end
@@ -635,6 +1113,7 @@ function white_king(move::String)
                 white[i[1], i[2]] = ""
                 white[rank,col] = "K"
                 black[rank,col] = ""
+                break
             end
         end
     end
@@ -661,6 +1140,7 @@ function black_king(move::String)
             if black[i[1],i[2]] == "K" && white[rank,col] == "" && black[rank,col] == ""
                 black[i[1], i[2]] = ""
                 black[rank,col] = "K"
+                break
             end
         end
     end
@@ -674,6 +1154,7 @@ function black_king(move::String)
                 black[i[1], i[2]] = ""
                 black[rank,col] = "K"
                 white[rank,col] = ""
+                break
             end
         end
     end
@@ -725,9 +1206,9 @@ end
 white = ["" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
-    "" "N" "" "" "" "N" "" "";
+    "" "B" "" "B" "" "N" "" "";
     "" "" "" "" "" "" "" "";
-    "" "N" "" "" "" "N" "" "";
+    "" "B" "" "B" "" "N" "" "";
     "p" "p" "p" "p" "p" "p" "p" "p";
     "" "N" "B" "Q" "K" "B" "N" "R"
 ]
@@ -738,7 +1219,7 @@ black = ["R" "N" "B" "Q" "K" "B" "N" "";
 "p" "p" "p" "p" "p" "p" "p" "p";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
-"" "" "" "p" "" "" "" "";
+"" "" "p" "p" "" "" "" "";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" ""
@@ -751,7 +1232,7 @@ black = ["R" "N" "B" "Q" "K" "B" "N" "";
 
 
 
-############################# obselete code (redone better)
+############################# obselete code (redone better) ######################
 
 """
 w_pawn()
