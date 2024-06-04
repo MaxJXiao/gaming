@@ -11,6 +11,7 @@ r_white = ["" "" "" "" "" "" "" "";
     "p" "p" "p" "p" "p" "p" "p" "p";
     "R" "N" "B" "Q" "K" "B" "N" "R"
 ]
+w_castle = [0]
 
 r_black = ["R" "N" "B" "Q" "K" "B" "N" "R";
     "p" "p" "p" "p" "p" "p" "p" "p";
@@ -21,7 +22,18 @@ r_black = ["R" "N" "B" "Q" "K" "B" "N" "R";
     "" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" ""
 ]
+b_castle = [0]
 
+
+b = ["" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" ""
+]
 
 
 """
@@ -33,6 +45,8 @@ function reset()
     white .= r_white
     black .= r_black
     
+    w_castle[1] *= 0
+    b_castle[1] *= 0
 end
 
 
@@ -43,6 +57,8 @@ Reset pieces for white
 """
 function w_reset()
     white .= r_white
+
+    w_castle[1] *= 0
 end
 
 """
@@ -52,8 +68,29 @@ Reset pieces for black
 """
 function b_reset()
     black .= r_black
+    
+    b_castle[1] *= 0
 end
 
+
+"""
+board()
+
+Show board with all pieces on
+"""
+function board()
+    for i ∈ eachindex(white)
+        if white[i] != ""
+            b[i] = white[i]
+        end
+        if black[i] != ""
+            b[i] = black[i]
+        end
+
+    end
+    return b
+    
+end
 
 
 
@@ -82,13 +119,56 @@ end
 
 
 """
-piece_identifier()
+white_move()
 
-Figure out which piece the player wants to move.
+Figure out which piece white wants to move.
 
 """
-function piece_identifier()
-    
+function white_move(move::String)
+    splitter = split(move, "")
+    if splitter[1] ∈ files
+        white_pawn(move)
+    elseif splitter[1] == "N"
+        white_knight(move)
+    elseif splitter[1] == "B"
+        white_bisharp(move)
+    elseif splitter[1] == "R"
+        white_rook(move)
+        w_castle[1] += 1
+    elseif splitter[1] == "Q"
+        white_queen(move)
+    elseif splitter[1] == "K"
+        white_king(move)
+        w_castle[1] += 1
+    end
+    remove_black_enpassant()
+end
+
+
+"""
+black_move()
+
+Figure out which piece black wants to move.
+
+"""
+function black_move(move::String)
+    splitter = split(move, "")
+    if splitter[1] ∈ files
+        black_pawn(move)
+    elseif splitter[1] == "N"
+        black_knight(move)
+    elseif splitter[1] == "B"
+        black_bisharp(move)
+    elseif splitter[1] == "R"
+        black_rook(move)
+        b_castle[1] += 1
+    elseif splitter[1] == "Q"
+        black_queen(move)
+    elseif splitter[1] == "K"
+        black_king(move)
+        b_castle[1] += 1
+    end
+    remove_white_enpassant()
 end
 
 """
@@ -194,6 +274,32 @@ function line_of_sight(cept::Vector{Any})
     
 end
 
+
+"""
+remove_white_enpassant()
+
+Remove the identifier that last turn was an en passant for white
+"""
+function remove_white_enpassant()
+    for i ∈ 1:8
+        if white[5,i] == "pe"
+            white[5,i] = "p"
+        end
+    end
+end
+
+"""
+remove_black_enpassant()
+
+Remove the identifier that last turn was an en passant for black
+"""
+function remove_black_enpassant()
+    for i ∈ 1:8
+        if black[4,i] == "pe"
+            black[4,i] = "p"
+        end
+    end
+end
 
 """
 white_pawn()
@@ -1054,7 +1160,7 @@ end
 """
 bisharp_surround()
 
-find all spots the bisharp could into the square from
+find all spots the bisharp could jump into the square from
 """
 function bisharp_surround(rank, col)
     indices = []
@@ -1075,6 +1181,715 @@ function bisharp_surround(rank, col)
     end
 
     return indices
+    
+end
+
+
+"""
+white_rook()
+
+Move the white rook.
+"""
+function white_rook(move::String)
+    splitter = split(move, "")
+
+    l = length(move)
+
+    if l == 3
+        col = convert_file(splitter[2])
+        rank = 9 - parse(Int, splitter[3])
+
+        for i ∈ rook_surround(rank, col)
+            if white[i[1], i[2]] == "R" && black[rank, col] == "" && white[rank, col] == ""
+
+                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[i[1], i[2]] = ""
+                    white[rank, col] = "R"
+                    break
+                end
+
+            end
+        end
+
+    elseif l == 4
+
+        if splitter[2] == "x"
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ rook_surround(rank,col)
+                if white[i[1], i[2]] == "R" && black[rank, col] != "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "R"
+                        black[rank, col] = ""
+                        break
+                    end
+                end
+
+            end
+        
+        elseif splitter[2] ∈ files # Nbd2
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int,splitter[4])
+
+            for i ∈ rook_surround(rank, col)
+                if white[i[1], i[2]] == "R" && i[2] == og_col &&
+                    white[rank, col] == "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "R"
+                        break
+                    end
+                end
+            end
+
+        elseif splitter[2] ∈ numbers # N3d4
+            og_rank = 9 - parse(Int, splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ rook_surround(rank, col)
+                if white[i[1], i[2]] == "R" && i[1] == og_rank &&
+                    white[rank, col] == "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "R"
+                        break
+                    end
+                end
+            end
+
+        end
+
+    elseif l == 5
+        if splitter[3] == "x"
+            if splitter[2] ∈ files # Ncxe5
+                og_col = convert_file(splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ rook_surround(rank, col)
+                    if white[i[1], i[2]] == "R" && i[2] == og_col &&
+                        white[rank, col] == "" && black[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "R"
+                            black[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+
+            elseif splitter[2] ∈ numbers # N3xd4
+                og_rank = 9 - parse(Int, splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ rook_surround(rank, col)
+                    if white[i[1], i[2]] == "R" && i[1] == og_rank &&
+                        white[rank, col] == "" && black[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "R"
+                            black[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+                    
+
+            end
+
+        elseif splitter[3] ∈ numbers # Nf2d3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[4])
+            rank = 9 - parse(Int, splitter[5])
+
+            if white[og_rank, og_col] == "R" && white[rank, col] == "" &&
+                black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    white[og_rank, og_col] = ""
+                    white[rank, col] = "R"
+                    
+                end
+            end
+            
+        end
+
+    elseif l == 6
+        if splitter[4] == "x" # Nf2xd3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[5])
+            rank = 9 - parse(Int, splitter[6])
+
+            if white[og_rank, og_col] == "R" && black[rank, col] != "" &&
+                white[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    white[og_rank, og_col] = ""
+                    white[rank, col] = "R"
+                    black[rank, col] = ""
+                end
+            end
+
+        end
+    end
+
+end
+
+"""
+black_rook()
+
+Move the black rook.
+"""
+function black_rook(move::String)
+    splitter = split(move, "")
+
+    l = length(move)
+
+    if l == 3
+        col = convert_file(splitter[2])
+        rank = 9 - parse(Int, splitter[3])
+
+        for i ∈ rook_surround(rank, col)
+            if black[i[1], i[2]] == "R" && white[rank, col] == "" && black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                    black[i[1], i[2]] = ""
+                    black[rank, col] = "R"
+                    break
+                end
+            end
+        end
+
+    elseif l == 4
+
+        if splitter[2] == "x"
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ rook_surround(rank,col)
+                if black[i[1], i[2]] == "R" && white[rank, col] != "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "R"
+                        white[rank, col] = ""
+                        break
+                    end
+                end
+
+            end
+        
+        elseif splitter[2] ∈ files # Nbd2
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int,splitter[4])
+
+            for i ∈ rook_surround(rank, col)
+                if black[i[1], i[2]] == "R" && i[2] == og_col &&
+                    black[rank, col] == "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "R"
+                        break
+                    end
+                end
+            end
+
+        elseif splitter[2] ∈ numbers # N3d4
+            og_rank = 9 - parse(Int, splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ rook_surround(rank, col)
+                if black[i[1], i[2]] == "R" && i[1] == og_rank &&
+                    black[rank, col] == "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "R"
+                        break
+                    end
+                end
+            end
+
+        end
+
+    elseif l == 5
+        if splitter[3] == "x"
+            if splitter[2] ∈ files # Ncxe5
+                og_col = convert_file(splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ rook_surround(rank, col)
+                    if black[i[1], i[2]] == "R" && i[2] == og_col &&
+                        black[rank, col] == "" && white[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "R"
+                            white[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+
+            elseif splitter[2] ∈ numbers # N3xd4
+                og_rank = 9 - parse(Int, splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ rook_surround(rank, col)
+                    if black[i[1], i[2]] == "R" && i[1] == og_rank &&
+                        black[rank, col] == "" && white[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "R"
+                            white[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+                    
+
+            end
+
+        elseif splitter[3] ∈ numbers # Nf2d3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[4])
+            rank = 9 - parse(Int, splitter[5])
+
+            if black[og_rank, og_col] == "R" && black[rank, col] == "" &&
+                white[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    black[og_rank, og_col] = ""
+                    black[rank, col] = "R"
+                end
+            end
+            
+        end
+
+    elseif l == 6
+        if splitter[4] == "x" # Nf2xd3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[5])
+            rank = 9 - parse(Int, splitter[6])
+
+            if black[og_rank, og_col] == "R" && white[rank, col] != "" &&
+                black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    black[og_rank, og_col] = ""
+                    black[rank, col] = "R"
+                    white[rank, col] = ""
+                end
+            end
+
+        end
+    end
+
+end
+
+
+
+"""
+rook_surround()
+
+find all spots the rook could jump into the square from
+"""
+function rook_surround(rank, col)
+    indices = []
+    for i ∈ 1:7
+        if rank - i > 0.5
+            append!(indices, [[rank - i, col]])
+        end
+        if rank + i < 8.5
+            append!(indices, [[rank + i, col]])
+        end
+        if col - i > 0.5
+            append!(indices,[[rank, col - i]])
+        end
+        if col + i < 8.5
+            append!(indices,[[rank, col + i]])
+        end
+
+    end
+
+    return indices
+    
+end
+
+
+"""
+white_queen()
+
+Move the white queen.
+"""
+function white_queen(move::String)
+    splitter = split(move, "")
+
+    l = length(move)
+
+    if l == 3
+        col = convert_file(splitter[2])
+        rank = 9 - parse(Int, splitter[3])
+
+        for i ∈ queen_surround(rank, col)
+            if white[i[1], i[2]] == "Q" && black[rank, col] == "" && white[rank, col] == ""
+
+                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[i[1], i[2]] = ""
+                    white[rank, col] = "Q"
+                    break
+                end
+
+            end
+        end
+
+    elseif l == 4
+
+        if splitter[2] == "x"
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ queen_surround(rank,col)
+                if white[i[1], i[2]] == "Q" && black[rank, col] != "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "Q"
+                        black[rank, col] = ""
+                        break
+                    end
+                end
+
+            end
+        
+        elseif splitter[2] ∈ files # Nbd2
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int,splitter[4])
+
+            for i ∈ queen_surround(rank, col)
+                if white[i[1], i[2]] == "Q" && i[2] == og_col &&
+                    white[rank, col] == "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "Q"
+                        break
+                    end
+                end
+            end
+
+        elseif splitter[2] ∈ numbers # N3d4
+            og_rank = 9 - parse(Int, splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ queen_surround(rank, col)
+                if white[i[1], i[2]] == "Q" && i[1] == og_rank &&
+                    white[rank, col] == "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "Q"
+                        break
+                    end
+                end
+            end
+
+        end
+
+    elseif l == 5
+        if splitter[3] == "x"
+            if splitter[2] ∈ files # Ncxe5
+                og_col = convert_file(splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ queen_surround(rank, col)
+                    if white[i[1], i[2]] == "Q" && i[2] == og_col &&
+                        white[rank, col] == "" && black[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "Q"
+                            black[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+
+            elseif splitter[2] ∈ numbers # N3xd4
+                og_rank = 9 - parse(Int, splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ queen_surround(rank, col)
+                    if white[i[1], i[2]] == "Q" && i[1] == og_rank &&
+                        white[rank, col] == "" && black[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "Q"
+                            black[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+                    
+
+            end
+
+        elseif splitter[3] ∈ numbers # Nf2d3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[4])
+            rank = 9 - parse(Int, splitter[5])
+
+            if white[og_rank, og_col] == "Q" && white[rank, col] == "" &&
+                black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    white[og_rank, og_col] = ""
+                    white[rank, col] = "Q"
+                    
+                end
+            end
+            
+        end
+
+    elseif l == 6
+        if splitter[4] == "x" # Nf2xd3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[5])
+            rank = 9 - parse(Int, splitter[6])
+
+            if white[og_rank, og_col] == "Q" && black[rank, col] != "" &&
+                white[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    white[og_rank, og_col] = ""
+                    white[rank, col] = "Q"
+                    black[rank, col] = ""
+                end
+            end
+
+        end
+    end
+
+end
+
+"""
+black_queen()
+
+Move the black queen.
+"""
+function black_queen(move::String)
+    splitter = split(move, "")
+
+    l = length(move)
+
+    if l == 3
+        col = convert_file(splitter[2])
+        rank = 9 - parse(Int, splitter[3])
+
+        for i ∈ queen_surround(rank, col)
+            if black[i[1], i[2]] == "Q" && white[rank, col] == "" && black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                    black[i[1], i[2]] = ""
+                    black[rank, col] = "Q"
+                    break
+                end
+            end
+        end
+
+    elseif l == 4
+
+        if splitter[2] == "x"
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ queen_surround(rank,col)
+                if black[i[1], i[2]] == "Q" && white[rank, col] != "" && black[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "Q"
+                        white[rank, col] = ""
+                        break
+                    end
+                end
+
+            end
+        
+        elseif splitter[2] ∈ files # Nbd2
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int,splitter[4])
+
+            for i ∈ queen_surround(rank, col)
+                if black[i[1], i[2]] == "Q" && i[2] == og_col &&
+                    black[rank, col] == "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "Q"
+                        break
+                    end
+                end
+            end
+
+        elseif splitter[2] ∈ numbers # N3d4
+            og_rank = 9 - parse(Int, splitter[2])
+
+            col = convert_file(splitter[3])
+            rank = 9 - parse(Int, splitter[4])
+
+            for i ∈ queen_surround(rank, col)
+                if black[i[1], i[2]] == "Q" && i[1] == og_rank &&
+                    black[rank, col] == "" && white[rank, col] == ""
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "Q"
+                        break
+                    end
+                end
+            end
+
+        end
+
+    elseif l == 5
+        if splitter[3] == "x"
+            if splitter[2] ∈ files # Ncxe5
+                og_col = convert_file(splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ queen_surround(rank, col)
+                    if black[i[1], i[2]] == "Q" && i[2] == og_col &&
+                        black[rank, col] == "" && white[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "Q"
+                            white[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+
+            elseif splitter[2] ∈ numbers # N3xd4
+                og_rank = 9 - parse(Int, splitter[2])
+
+                col = convert_file(splitter[4])
+                rank = 9 - parse(Int, splitter[5])
+
+                for i ∈ queen_surround(rank, col)
+                    if black[i[1], i[2]] == "Q" && i[1] == og_rank &&
+                        black[rank, col] == "" && white[rank, col] != ""
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "Q"
+                            white[rank, col] = ""
+                            break
+                        end
+                    end
+                end
+                    
+
+            end
+
+        elseif splitter[3] ∈ numbers # Nf2d3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[4])
+            rank = 9 - parse(Int, splitter[5])
+
+            if black[og_rank, og_col] == "Q" && black[rank, col] == "" &&
+                white[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    black[og_rank, og_col] = ""
+                    black[rank, col] = "Q"
+                end
+            end
+            
+        end
+
+    elseif l == 6
+        if splitter[4] == "x" # Nf2xd3
+            og_rank = 9 - parse(Int, splitter[3])
+            og_col = convert_file(splitter[2])
+
+            col = convert_file(splitter[5])
+            rank = 9 - parse(Int, splitter[6])
+
+            if black[og_rank, og_col] == "Q" && white[rank, col] != "" &&
+                black[rank, col] == ""
+                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+
+                    black[og_rank, og_col] = ""
+                    black[rank, col] = "Q"
+                    white[rank, col] = ""
+                end
+            end
+
+        end
+    end
+
+end
+
+
+
+"""
+queen_surround()
+
+find all spots the queen could jump into the square from
+"""
+function queen_surround(rank, col)
+    return [rook_surround(rank, col); bisharp_surround(rank,col)]
     
 end
 
@@ -1198,9 +2013,32 @@ function king_surround(rank::Int,col::Int)
 end
 
 
+"""
+white_castle()
+
+Castle for white
+"""
+function white_castle(move::String)
+    if w_castle[1] == 0
+        if move == "O-O"
+            if white[8,6] == "" && white[8,7] == "" &&
+                black[8,6] == "" && black[8,7] == ""
+                # check function see if king is in check on the [8,5], [8,6], [8,7]
+            end
+        elseif move == "O-O-O"
+            if white[8,4] == "" && white[8,3] == "" &&
+                black[8,4] == "" && black[8,3] == ""
+                
+            end
+        end
+
+    end
+end
 
 
 
+
+### test boards
 
 
 white = ["" "" "" "" "" "" "" "";
