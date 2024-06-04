@@ -12,6 +12,9 @@ r_white = ["" "" "" "" "" "" "" "";
     "R" "N" "B" "Q" "K" "B" "N" "R"
 ]
 w_castle = [0]
+w_lrook = [0]
+w_rrook = [0]
+
 
 r_black = ["R" "N" "B" "Q" "K" "B" "N" "R";
     "p" "p" "p" "p" "p" "p" "p" "p";
@@ -23,7 +26,19 @@ r_black = ["R" "N" "B" "Q" "K" "B" "N" "R";
     "" "" "" "" "" "" "" ""
 ]
 b_castle = [0]
+b_lrook = [0]
+b_rrook = [0]
 
+
+r_b = ["" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" ""
+]
 
 b = ["" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
@@ -44,9 +59,14 @@ Reset pieces
 function reset()
     white .= r_white
     black .= r_black
+    b .= r_b
     
     w_castle[1] *= 0
     b_castle[1] *= 0
+    w_lrook[1] *= 0
+    b_lrook[1] *= 0
+    w_rrook[1] *= 0
+    b_rrook[1] *= 0
 end
 
 
@@ -59,6 +79,8 @@ function w_reset()
     white .= r_white
 
     w_castle[1] *= 0
+    w_lrook[1] *= 0
+    w_rrook[1] *= 0
 end
 
 """
@@ -70,6 +92,8 @@ function b_reset()
     black .= r_black
     
     b_castle[1] *= 0
+    b_lrook[1] *= 0
+    b_rrook[1] *= 0
 end
 
 
@@ -79,6 +103,7 @@ board()
 Show board with all pieces on
 """
 function board()
+    b .= r_b
     for i ∈ eachindex(white)
         if white[i] != ""
             b[i] = white[i]
@@ -116,60 +141,6 @@ function convert_file(letter::SubString{String})
     end
 end
 
-
-
-"""
-white_move()
-
-Figure out which piece white wants to move.
-
-"""
-function white_move(move::String)
-    splitter = split(move, "")
-    if splitter[1] ∈ files
-        white_pawn(move)
-    elseif splitter[1] == "N"
-        white_knight(move)
-    elseif splitter[1] == "B"
-        white_bisharp(move)
-    elseif splitter[1] == "R"
-        white_rook(move)
-        w_castle[1] += 1
-    elseif splitter[1] == "Q"
-        white_queen(move)
-    elseif splitter[1] == "K"
-        white_king(move)
-        w_castle[1] += 1
-    end
-    remove_black_enpassant()
-end
-
-
-"""
-black_move()
-
-Figure out which piece black wants to move.
-
-"""
-function black_move(move::String)
-    splitter = split(move, "")
-    if splitter[1] ∈ files
-        black_pawn(move)
-    elseif splitter[1] == "N"
-        black_knight(move)
-    elseif splitter[1] == "B"
-        black_bisharp(move)
-    elseif splitter[1] == "R"
-        black_rook(move)
-        b_castle[1] += 1
-    elseif splitter[1] == "Q"
-        black_queen(move)
-    elseif splitter[1] == "K"
-        black_king(move)
-        b_castle[1] += 1
-    end
-    remove_white_enpassant()
-end
 
 """
 piece_interception()
@@ -251,6 +222,7 @@ function piece_interception(rank,col,og_rank,og_col)
     return indices
 end
 
+
 """
 line_of_sight()
 
@@ -288,6 +260,7 @@ function remove_white_enpassant()
     end
 end
 
+
 """
 remove_black_enpassant()
 
@@ -300,6 +273,80 @@ function remove_black_enpassant()
         end
     end
 end
+
+
+#################### MOVES ##########################
+
+
+"""
+white_move()
+
+Figure out which piece white wants to move.
+
+"""
+function white_move(move::String)
+    splitter = split(move, "")
+    if splitter[1] ∈ files
+        white_pawn(move)
+    elseif splitter[1] == "N"
+        white_knight(move)
+    elseif splitter[1] == "B"
+        white_bisharp(move)
+    elseif splitter[1] == "R"
+        white_rook(move)
+        if w_castle == 0
+            if white[8,1] != "R"
+                w_lrook += 1
+            elseif white[8,8] != "R"
+                w_rrook += 1
+            end
+        end
+    elseif splitter[1] == "Q"
+        white_queen(move)
+    elseif splitter[1] == "K"
+        white_king(move)
+        w_castle[1] += 1
+    elseif splitter[1] == "O"
+        white_castle(move)
+    end
+    remove_black_enpassant()
+end
+
+
+"""
+black_move()
+
+Figure out which piece black wants to move.
+
+"""
+function black_move(move::String)
+    splitter = split(move, "")
+    if splitter[1] ∈ files
+        black_pawn(move)
+    elseif splitter[1] == "N"
+        black_knight(move)
+    elseif splitter[1] == "B"
+        black_bisharp(move)
+    elseif splitter[1] == "R"
+        black_rook(move)
+        if b_castle == 0
+            if black[1,1] != "R"
+                b_lrook += 1
+            elseif black[1,8] != "R"
+                b_rrook += 1
+            end
+        end
+    elseif splitter[1] == "Q"
+        black_queen(move)
+    elseif splitter[1] == "K"
+        black_king(move)
+        b_castle[1] += 1
+    elseif splitter[1] == "O"
+        black_castle(move)
+    end
+    remove_white_enpassant()
+end
+
 
 """
 white_pawn()
@@ -386,6 +433,7 @@ function white_pawn(move::String)
 
 
 end
+
 
 """
 black_pawn()
@@ -991,6 +1039,7 @@ function white_bisharp(move::String)
 
 end
 
+
 """
 black_bisharp()
 
@@ -1156,6 +1205,7 @@ function black_bisharp(move::String)
     end
 
 end
+
 
 """
 bisharp_surround()
@@ -1352,6 +1402,7 @@ function white_rook(move::String)
 
 end
 
+
 """
 black_rook()
 
@@ -1517,7 +1568,6 @@ function black_rook(move::String)
     end
 
 end
-
 
 
 """
@@ -1715,6 +1765,7 @@ function white_queen(move::String)
 
 end
 
+
 """
 black_queen()
 
@@ -1882,7 +1933,6 @@ function black_queen(move::String)
 end
 
 
-
 """
 queen_surround()
 
@@ -1976,6 +2026,7 @@ function black_king(move::String)
 
 end
 
+
 """
 king_surround()
 
@@ -2020,15 +2071,31 @@ Castle for white
 """
 function white_castle(move::String)
     if w_castle[1] == 0
-        if move == "O-O"
+        if move == "O-O" && w_rrook[1] == 0
             if white[8,6] == "" && white[8,7] == "" &&
                 black[8,6] == "" && black[8,7] == ""
                 # check function see if king is in check on the [8,5], [8,6], [8,7]
+                if white_check(8,5) == 0 && white_check(8,6) == 0 &&
+                    white_check(8,7) == 0
+                    white[8,5] = ""
+                    white[8,7] = "K"
+                    white[8,8] = ""
+                    white[8,6] = "R"
+                    w_castle[1] += 1000
+                end
             end
-        elseif move == "O-O-O"
-            if white[8,4] == "" && white[8,3] == "" &&
-                black[8,4] == "" && black[8,3] == ""
-                
+        elseif move == "O-O-O" && w_lrook[1] == 0
+            if white[8,4] == "" && white[8,3] == "" && white[8,2] == ""
+                black[8,4] == "" && black[8,3] == "" && black[8,2] == ""
+                if white_check(8,5) == 0 && white_check(8,4) == 0 &&
+                    white_check(8,3) == 0
+                    white[8,5] = ""
+                    white[8,3] = "K"
+                    white[8,1] = ""
+                    white[8,4] = "R"
+                    w_castle[1] += 1000
+                end
+
             end
         end
 
@@ -2036,9 +2103,163 @@ function white_castle(move::String)
 end
 
 
+"""
+black_castle()
+
+Castle for black
+"""
+function black_castle(move::String)
+    if b_castle[1] == 0
+        if move == "O-O" && b_rrook[1] == 0
+            if white[1,6] == "" && white[1,7] == "" &&
+                black[1,6] == "" && black[1,7] == ""
+                # check function see if king is in check on the [8,5], [8,6], [8,7]
+                if black_check(1,5) == 0 && black_check(1,6) == 0 &&
+                    black_check(1,7) == 0
+                    black[1,5] = ""
+                    black[1,7] = "K"
+                    black[1,8] = ""
+                    black[1,6] = "R"
+                    b_castle[1] += 1000
+                end
+            end
+        elseif move == "O-O-O" && b_lrook[1] == 0
+            if white[1,4] == "" && white[1,3] == "" && white[1,2] == ""
+                black[1,4] == "" && black[1,3] == "" && black[1,2] == ""
+                if black_check(1,5) == 0 && black_check(1,4) == 0 &&
+                    black_check(1,3) == 0
+                    black[1,5] = ""
+                    black[1,3] = "K"
+                    black[1,1] = ""
+                    black[1,4] = "R"
+                    b_castle[1] += 1000
+                end
+
+            end
+        end
+
+    end
+end
 
 
-### test boards
+"""
+white_check()
+
+See if the white king is in check on those squares
+"""
+function white_check(rank, col)
+
+    n_squares = knight_surround(rank, col)
+    n_len = length(n_squares)
+    check = 0
+
+    if n_len != 0
+        for i ∈ n_squares
+            if black[i[1], i[2]] == "N"
+                check += 1
+                break
+            end
+        end
+    end
+
+
+    if check == 0
+
+        b_squares = bisharp_surround(rank, col)
+        b_len = length(b_squares)
+        if b_len != 0
+            for i ∈ b_squares
+                if black[i[1], i[2]] == "B" || black[i[1], i[2]] == "Q"
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+
+    end
+
+    if check == 0
+        r_squares = rook_surround(rank, col)
+        r_len = length(r_squares)
+        if r_len != 0
+            for i ∈ r_squares
+                if black[i[1], i[2]] == "R" || black[i[1], i[2]] == "Q"
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    return check
+end
+
+
+"""
+black_check()
+
+See if the black king is in check on those squares
+"""
+function black_check(rank, col)
+
+    n_squares = knight_surround(rank, col)
+    n_len = length(n_squares)
+    check = 0
+
+    if n_len != 0
+        for i ∈ n_squares
+            if white[i[1], i[2]] == "N"
+                check += 1
+                break
+            end
+        end
+    end
+
+
+    if check == 0
+
+        b_squares = bisharp_surround(rank, col)
+        b_len = length(b_squares)
+        if b_len != 0
+            for i ∈ b_squares
+                if white[i[1], i[2]] == "B" || white[i[1], i[2]] == "Q"
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+
+    end
+
+    if check == 0
+        r_squares = rook_surround(rank, col)
+        r_len = length(r_squares)
+        if r_len != 0
+            for i ∈ r_squares
+                if white[i[1], i[2]] == "R" || white[i[1], i[2]] == "Q"
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    return check
+end
+
+
+
+
+
+######################### test boards ####################################
 
 
 white = ["" "" "" "" "" "" "" "";
