@@ -76,11 +76,11 @@ black = ["R" "N" "B" "Q" "K" "B" "N" "R";
 
 
 """
-reset()
+board_reset()
 
 Reset pieces
 """
-function reset()
+function board_reset()
     white .= r_white
     black .= r_black
     b .= r_b

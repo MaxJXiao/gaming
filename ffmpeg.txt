@@ -1,0 +1,17 @@
+# convert images into MP4 video
+
+ffmpeg -i "%10d.png" -c:v libx264 -crf 0 "../movie.mp4"
+
+crf = 0 best quality
+crf = 51 worst quality
+
+ffmpeg -r 50 -i "%10d.png" -c:v libx264 -crf 0 "../movie.mp4"
+
+-r 50 means 50 frames per second, default is 25
+
+.../ means in directory before current
+
+
+## gif maker (1.5 frames per second can lower)
+
+ffmpeg -r 1.5 -i image-%d.png output.gif
