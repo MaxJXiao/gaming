@@ -14,6 +14,7 @@ r_white = ["" "" "" "" "" "" "" "";
 w_castle = [0]
 w_lrook = [0]
 w_rrook = [0]
+w_king = [8,5]
 
 
 r_black = ["R" "N" "B" "Q" "K" "B" "N" "R";
@@ -28,6 +29,7 @@ r_black = ["R" "N" "B" "Q" "K" "B" "N" "R";
 b_castle = [0]
 b_lrook = [0]
 b_rrook = [0]
+b_king = [1,5]
 
 
 r_b = ["" "" "" "" "" "" "" "";
@@ -51,6 +53,28 @@ b = ["" "" "" "" "" "" "" "";
 ]
 
 
+white = ["" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "p" "p" "p" "p" "p" "p" "p" "p";
+    "R" "N" "B" "Q" "K" "B" "N" "R"
+]
+
+
+black = ["R" "N" "B" "Q" "K" "B" "N" "R";
+"p" "p" "p" "p" "p" "p" "p" "p";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" ""
+]
+
+
 """
 reset()
 
@@ -60,6 +84,9 @@ function reset()
     white .= r_white
     black .= r_black
     b .= r_b
+
+    w_king .= [8, 5]
+    b_king .= [1, 5]
     
     w_castle[1] *= 0
     b_castle[1] *= 0
@@ -1959,11 +1986,15 @@ function white_king(move::String)
     if l == 3
         col = convert_file(splitter[2])
         rank = 9 - parse(Int, splitter[3])
-        for i ∈ king_surround(rank,col)
-            if white[i[1],i[2]] == "K" && black[rank, col] == "" && white[rank, col] == ""
-                white[i[1], i[2]] = ""
-                white[rank,col] = "K"
-                break
+        if white_check(rank, col) == 0
+            for i ∈ king_surround(rank,col)
+                if white[i[1],i[2]] == "K" && black[rank, col] == "" && white[rank, col] == ""
+                    white[i[1], i[2]] = ""
+                    white[rank,col] = "K"
+                    w_king[1] = rank
+                    w_king[2] = col
+                    break
+                end
             end
         end
     end
@@ -1973,12 +2004,16 @@ function white_king(move::String)
         col = convert_file(splitter[3])
         rank = 9 - parse(Int, splitter[4])
 
-        for i ∈ king_surround(rank,col)
-            if white[i[1], i[2]] == "K" && black[rank, col] != "" && white[rank, col] == ""
-                white[i[1], i[2]] = ""
-                white[rank,col] = "K"
-                black[rank,col] = ""
-                break
+        if white_check(rank, col) == 0
+            for i ∈ king_surround(rank,col)
+                if white[i[1], i[2]] == "K" && black[rank, col] != "" && white[rank, col] == ""
+                    white[i[1], i[2]] = ""
+                    white[rank,col] = "K"
+                    black[rank,col] = ""
+                    w_king[1] = rank
+                    w_king[2] = col
+                    break
+                end
             end
         end
     end
@@ -2001,11 +2036,16 @@ function black_king(move::String)
     if l == 3
         col = convert_file(splitter[2])
         rank = 9 - parse(Int, splitter[3])
-        for i ∈ king_surround(rank,col)
-            if black[i[1],i[2]] == "K" && white[rank,col] == "" && black[rank,col] == ""
-                black[i[1], i[2]] = ""
-                black[rank,col] = "K"
-                break
+
+        if black_check(rank, col) == 0
+            for i ∈ king_surround(rank,col)
+                if black[i[1],i[2]] == "K" && white[rank,col] == "" && black[rank,col] == ""
+                    black[i[1], i[2]] = ""
+                    black[rank,col] = "K"
+                    b_king[1] = rank
+                    b_king[2] = col
+                    break
+                end
             end
         end
     end
@@ -2014,12 +2054,17 @@ function black_king(move::String)
     if l == 4
         col = convert_file(splitter[3])
         rank = 9 - parse(Int, splitter[4])
-        for i ∈ king_surround(rank,col)
-            if black[i[1],i[2]] == "K" && white[rank,col] != "" && black[rank,col] == ""
-                black[i[1], i[2]] = ""
-                black[rank,col] = "K"
-                white[rank,col] = ""
-                break
+
+        if black_check(rank,col) == 0
+            for i ∈ king_surround(rank,col)
+                if black[i[1],i[2]] == "K" && white[rank,col] != "" && black[rank,col] == ""
+                    black[i[1], i[2]] = ""
+                    black[rank,col] = "K"
+                    white[rank,col] = ""
+                    b_king[1] = rank
+                    b_king[2] = col
+                    break
+                end
             end
         end
     end
@@ -2082,6 +2127,10 @@ function white_castle(move::String)
                     white[8,8] = ""
                     white[8,6] = "R"
                     w_castle[1] += 1000
+
+                    w_king[1] = 8
+                    w_king[2] = 7
+
                 end
             end
         elseif move == "O-O-O" && w_lrook[1] == 0
@@ -2094,6 +2143,9 @@ function white_castle(move::String)
                     white[8,1] = ""
                     white[8,4] = "R"
                     w_castle[1] += 1000
+
+                    w_king[1] = 8
+                    w_king[2] = 3
                 end
 
             end
@@ -2121,6 +2173,9 @@ function black_castle(move::String)
                     black[1,8] = ""
                     black[1,6] = "R"
                     b_castle[1] += 1000
+
+                    b_king[1] = 1
+                    b_king[2] = 7
                 end
             end
         elseif move == "O-O-O" && b_lrook[1] == 0
@@ -2133,6 +2188,9 @@ function black_castle(move::String)
                     black[1,1] = ""
                     black[1,4] = "R"
                     b_castle[1] += 1000
+
+                    b_king[1] = 1
+                    b_king[2] = 3
                 end
 
             end
