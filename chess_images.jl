@@ -46,12 +46,40 @@ img_bking = joinpath(@__DIR__, "images", "chess", "black-king.png")
 bking = FileIO.load(img_bking)
 
 
+im_bisharp = joinpath(@__DIR__, "images", "chess", "bisharp (copy).png")
+litbisharp = FileIO.load(im_bisharp)
+
+im_shiny_bisharp = joinpath(@__DIR__, "images", "chess", "shinybisharp (copy).png")
+litshinybisharp = FileIO.load(im_shiny_bisharp)
+
+
+
+
 ############################################################################
 
-simon = wpawn[1,1]
 
-whitepgn = white_board;
-blackpgn = black_board;
+simon = wpawn[1,1]
+says = litbisharp[1,1]
+
+
+white_board = FileIO.load(img_white)
+whitepgn = copy(white_board);
+
+black_board = FileIO.load(img_black)
+blackpgn = copy(black_board);
+
+
+function reset_white_board()
+    whitepgn .= copy(white_board)
+end
+
+function reset_black_board()
+    blackpgn .= copy(white_board)
+end
+
+
+"""
+Show not to use the transparent part of image
 
 for i ∈ 1:128
     for j ∈ 1:128
@@ -61,11 +89,16 @@ for i ∈ 1:128
         end
     end
 end
+"""
 
+"""
+draw_white_pgn()
 
+Use the white and black boards to make a complete image from the white side
+"""
 function draw_white_pgn()
 
-    whitepgn .= white_board
+    reset_white_board()
 
     for i ∈ 1:8
         for j ∈ 1:8
@@ -96,9 +129,9 @@ function draw_white_pgn()
             if white[i,j] == "B"
                 for m ∈ 1:128
                     for n ∈ 1:128
-                        if wbisharp[m, n] == simon
+                        if litbisharp[m, n] == says
                         else
-                            whitepgn[(i - 1)*128 + m, (j - 1)*128 + n] = wbisharp[m,n]
+                            whitepgn[(i - 1)*128 + m, (j - 1)*128 + n] = litbisharp[m,n]
                         end
                     end
                 end
@@ -165,9 +198,9 @@ function draw_white_pgn()
             if black[i,j] == "B"
                 for m ∈ 1:128
                     for n ∈ 1:128
-                        if bbisharp[m, n] == simon
+                        if litshinybisharp[m, n] == says
                         else
-                            whitepgn[(i - 1)*128 + m, (j - 1)*128 + n] = bbisharp[m,n]
+                            whitepgn[(i - 1)*128 + m, (j - 1)*128 + n] = litshinybisharp[m,n]
                         end
                     end
                 end
@@ -212,13 +245,14 @@ function draw_white_pgn()
     
 end
 
+"""
+draw_black_pgn()
 
-
-
-
+Use the white and black boards to make a complete image from the black side
+"""
 function draw_black_pgn()
 
-    blackpgn .= black_board
+    reset_black_board()
 
     for i ∈ 1:8
         for j ∈ 1:8
@@ -249,9 +283,9 @@ function draw_black_pgn()
             if white[i,j] == "B"
                 for m ∈ 1:128
                     for n ∈ 1:128
-                        if wbisharp[m, n] == simon
+                        if litbisharp[m, n] == says
                         else
-                            blackpgn[(8 - i)*128 + m, (8 - j)*128 + n] = wbisharp[m,n]
+                            blackpgn[(8 - i)*128 + m, (8 - j)*128 + n] = litbisharp[m,n]
                         end
                     end
                 end
@@ -318,9 +352,9 @@ function draw_black_pgn()
             if black[i,j] == "B"
                 for m ∈ 1:128
                     for n ∈ 1:128
-                        if bbisharp[m, n] == simon
+                        if litshinybisharp[m, n] == says
                         else
-                            blackpgn[(8 - i)*128 + m, (8 - j)*128 + n] = bbisharp[m,n]
+                            blackpgn[(8 - i)*128 + m, (8 - j)*128 + n] = litshinybisharp[m,n]
                         end
                     end
                 end
@@ -364,3 +398,4 @@ function draw_black_pgn()
 
     
 end
+
