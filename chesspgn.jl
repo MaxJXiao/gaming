@@ -78,6 +78,14 @@ function white_gif_maker(sequence::Vector{Any})
         draw_white_pgn()
         save(joinpath(@__DIR__, "images", "chess", "png", "$i.png"), whitepgn)
     end
+
+    # extend the end of the gif on final position
+    
+    l = length(sequence)
+    for i ∈ l+1:l+3
+        save(joinpath(@__DIR__, "images", "chess", "png", "$i.png"), whitepgn)
+    end
+
 end
 
 """
@@ -98,6 +106,14 @@ function black_gif_maker(sequence::Vector{Any})
         draw_black_pgn()
         save(joinpath(@__DIR__, "images", "chess", "png", "$i.png"), blackpgn)
     end
+
+    # extend the end of the gif on final position
+    
+    l = length(sequence)
+    for i ∈ l+1:l+3
+        save(joinpath(@__DIR__, "images", "chess", "png", "$i.png"), blackpgn)
+    end
+
 end
 
 
