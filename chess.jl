@@ -42,6 +42,7 @@ r_b = ["" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" ""
 ]
 
+
 b = ["" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
@@ -65,6 +66,28 @@ white = ["" "" "" "" "" "" "" "";
 
 
 black = ["R" "N" "B" "Q" "K" "B" "N" "R";
+"p" "p" "p" "p" "p" "p" "p" "p";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" "";
+"" "" "" "" "" "" "" ""
+]
+
+
+w_copy = ["" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "p" "p" "p" "p" "p" "p" "p" "p";
+    "R" "N" "B" "Q" "K" "B" "N" "R"
+]
+
+
+b_copy = ["R" "N" "B" "Q" "K" "B" "N" "R";
 "p" "p" "p" "p" "p" "p" "p" "p";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
@@ -110,6 +133,7 @@ function w_reset()
     w_rrook[1] *= 0
 end
 
+
 """
 b_reset()
 
@@ -144,16 +168,6 @@ function board()
     
 end
 
-
-
-# need to define all legal moves
-
-# while gaming != true
-# turn
-
-# switch *= -1
-
-# check legality after
 
 """
 convert_file()
@@ -389,30 +403,43 @@ function white_pawn(move::String)
         col = convert_file(splitter[1])
         rank = 9 - parse(Int, splitter[2])
 
-        if white[rank + 1, col] == "p" && black[rank,col] == "" && white[rank,col] == ""
-            white[rank + 1, col] = ""
-            white[rank, col] = "p"
-        elseif white[rank + 1, col] == "pe" && black[rank,col] == "" && white[rank,col] == ""
-            white[rank + 1, col] = ""
-            white[rank, col] = "p"
+        if white_future(splitter[1], rank + 1, col, rank, col) == 1
+
+            if white[rank + 1, col] == "p" && black[rank,col] == "" && white[rank,col] == ""
+                white[rank + 1, col] = ""
+                white[rank, col] = "p"
+            elseif white[rank + 1, col] == "pe" && black[rank,col] == "" && white[rank,col] == ""
+                white[rank + 1, col] = ""
+                white[rank, col] = "p"
+            end
+
         end
 
         if rank == 5 # change to 4 for black and + +> -
-            if white[rank + 2, col] == "p" &&
-                white[rank + 1, col] == "" && black[rank + 1, col] == "" &&
-                white[rank,col] == "" && black[rank,col] == ""
-                    white[rank + 2, col] = ""
-                    white[rank,col] = "pe"
+
+            if white_future(splitter[1], rank + 2, col, rank, col) == 1
+                if white[rank + 2, col] == "p" &&
+                    white[rank + 1, col] == "" && black[rank + 1, col] == "" &&
+                    white[rank,col] == "" && black[rank,col] == ""
+                        white[rank + 2, col] = ""
+                        white[rank,col] = "pe"
+                end
             end
+
         end
 
     elseif l == 4
         if splitter[2] == "8"
             col = convert_file(splitter[1])
             rank = 9 - parse(Int, splitter[2]) # for consistency for black
-            if white[rank + 1, col] == "p" && black[rank, col] == "" && white[rank,col] == ""
-                white[rank + 1, col] = ""
-                white[rank, col] = string(splitter[4])
+
+            if white_future(splitter[1], rank + 1, col, rank, col) == 1
+
+                if white[rank + 1, col] == "p" && black[rank, col] == "" && white[rank,col] == ""
+                    white[rank + 1, col] = ""
+                    white[rank, col] = string(splitter[4])
+                end
+
             end
         
         elseif splitter[2] == "x"
@@ -421,24 +448,28 @@ function white_pawn(move::String)
             col = convert_file(splitter[3])
             rank = 9 - parse(Int, splitter[4]) 
 
-            if white[rank + 1, og_col] == "p" && black[rank, col] != "" &&
-                white[rank, col] == ""
-                    white[rank + 1, og_col] = ""
-                    white[rank, col] = "p"
-                    black[rank, col] = ""
-            elseif white[rank + 1, og_col] == "pe" && black[rank, col] != "" &&
-                white[rank,col] == ""
-                    white[rank + 1, og_col] = ""
-                    white[rank, col] = "p"
-                    black[rank, col] = ""
+            if white_future(splitter[1], rank + 1, og_col, rank, col) == 1
 
-            # en_passant
-            elseif rank == 3 && white[rank + 1, og_col] == "p" &&
-                white[rank, col] == "" && black[rank, col] == "" &&
-                black[rank + 1, col] == "pe"
-                    white[rank + 1, og_col] = ""
-                    white[rank, col] = "p"
-                    black[rank + 1, col] = ""
+                if white[rank + 1, og_col] == "p" && black[rank, col] != "" &&
+                    white[rank, col] == ""
+                        white[rank + 1, og_col] = ""
+                        white[rank, col] = "p"
+                        black[rank, col] = ""
+                elseif white[rank + 1, og_col] == "pe" && black[rank, col] != "" &&
+                    white[rank,col] == ""
+                        white[rank + 1, og_col] = ""
+                        white[rank, col] = "p"
+                        black[rank, col] = ""
+
+                # en_passant
+                elseif rank == 3 && white[rank + 1, og_col] == "p" &&
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    black[rank + 1, col] == "pe"
+                        white[rank + 1, og_col] = ""
+                        white[rank, col] = "p"
+                        black[rank + 1, col] = ""
+                end
+
             end
 
         end
@@ -449,11 +480,16 @@ function white_pawn(move::String)
         col = convert_file(splitter[3])
         rank = 9 - parse(Int, splitter[4])
 
-        if white[rank + 1, og_col] == "p" && black[rank, col] != "" &&
-            white[rank, col] == ""
-                white[rank + 1, og_col] = ""
-                white[rank, col] = string(splitter[6])
-                black[rank, col] = ""
+        if white_future(splitter[1], rank + 1, og_col, rank, col) == 1
+
+
+            if white[rank + 1, og_col] == "p" && black[rank, col] != "" &&
+                white[rank, col] == ""
+                    white[rank + 1, og_col] = ""
+                    white[rank, col] = string(splitter[6])
+                    black[rank, col] = ""
+            end
+
         end
 
     end
@@ -476,20 +512,27 @@ function black_pawn(move::String)
         col = convert_file(splitter[1])
         rank = 9 - parse(Int, splitter[2])
 
-        if black[rank - 1, col] == "p" && white[rank,col] == "" && black[rank,col] == ""
-            black[rank - 1, col] = ""
-            black[rank, col] = "p"
-        elseif black[rank - 1, col] == "pe" && white[rank,col] == "" && black[rank,col] == ""
-            black[rank - 1, col] = ""
-            black[rank, col] = "p"
+        if black_future(splitter[1], rank - 1, col, rank, col) == 1
+
+            if black[rank - 1, col] == "p" && white[rank,col] == "" && black[rank,col] == ""
+                black[rank - 1, col] = ""
+                black[rank, col] = "p"
+            elseif black[rank - 1, col] == "pe" && white[rank,col] == "" && black[rank,col] == ""
+                black[rank - 1, col] = ""
+                black[rank, col] = "p"
+            end
+
         end
 
         if rank == 4 # change to 4 for black and + +> -
-            if black[rank - 2, col] == "p" &&
-                black[rank - 1, col] == "" && white[rank - 1, col] == "" &&
-                black[rank,col] == "" && white[rank,col] == ""
-                    black[rank - 2, col] = ""
-                    black[rank, col] = "pe"
+
+            if black_future(splitter[1], rank - 2, col, rank, col) == 1
+                if black[rank - 2, col] == "p" &&
+                    black[rank - 1, col] == "" && white[rank - 1, col] == "" &&
+                    black[rank,col] == "" && white[rank,col] == ""
+                        black[rank - 2, col] = ""
+                        black[rank, col] = "pe"
+                end
             end
         end
 
@@ -497,9 +540,14 @@ function black_pawn(move::String)
         if splitter[2] == "1"
             col = convert_file(splitter[1])
             rank = 9 - parse(Int, splitter[2]) # for consistency for black
-            if black[rank - 1, col] == "p" && white[rank, col] == "" && black[rank,col] == ""
-                black[rank - 1, col] = ""
-                black[rank, col] = string(splitter[4])
+
+            if black_future(splitter[1], rank - 1, col, rank, col) == 1
+
+                if black[rank - 1, col] == "p" && white[rank, col] == "" && black[rank,col] == ""
+                    black[rank - 1, col] = ""
+                    black[rank, col] = string(splitter[4])
+                end
+
             end
         
         elseif splitter[2] == "x"
@@ -508,24 +556,28 @@ function black_pawn(move::String)
             col = convert_file(splitter[3])
             rank = 9 - parse(Int, splitter[4]) 
 
-            if black[rank - 1, og_col] == "p" && white[rank, col] != "" &&
-                black[rank, col] == ""
-                    black[rank - 1, og_col] = ""
-                    black[rank, col] = "p"
-                    white[rank, col] = ""
-            elseif black[rank - 1, og_col] == "pe" && white[rank, col] != "" &&
-                black[rank,col] == ""
-                    black[rank - 1, og_col] = ""
-                    black[rank, col] = "p"
-                    white[rank, col] = ""
+            if black_future(splitter[1], rank - 1, og_col, rank, col) == 1
 
-            # en_passant
-            elseif rank == 6 && black[rank - 1, og_col] == "p" &&
-                black[rank, col] == "" && white[rank, col] == "" &&
-                white[rank - 1, col] == "pe"
-                    black[rank - 1, og_col] = ""
-                    black[rank, col] = "p"
-                    white[rank - 1, col] = ""
+                if black[rank - 1, og_col] == "p" && white[rank, col] != "" &&
+                    black[rank, col] == ""
+                        black[rank - 1, og_col] = ""
+                        black[rank, col] = "p"
+                        white[rank, col] = ""
+                elseif black[rank - 1, og_col] == "pe" && white[rank, col] != "" &&
+                    black[rank,col] == ""
+                        black[rank - 1, og_col] = ""
+                        black[rank, col] = "p"
+                        white[rank, col] = ""
+
+                # en_passant
+                elseif rank == 6 && black[rank - 1, og_col] == "p" &&
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    white[rank - 1, col] == "pe"
+                        black[rank - 1, og_col] = ""
+                        black[rank, col] = "p"
+                        white[rank - 1, col] = ""
+                end
+
             end
 
         end
@@ -536,11 +588,15 @@ function black_pawn(move::String)
         col = convert_file(splitter[3])
         rank = 9 - parse(Int, splitter[4])
 
-        if black[rank - 1, og_col] == "p" && white[rank, col] != "" &&
-            black[rank, col] == ""
-                black[rank - 1, og_col] = ""
-                black[rank, col] = string(splitter[6])
-                white[rank, col] = ""
+        if black_future(splitter[1], rank - 1, og_col, rank, col) == 1
+
+            if black[rank - 1, og_col] == "p" && white[rank, col] != "" &&
+                black[rank, col] == ""
+                    black[rank - 1, og_col] = ""
+                    black[rank, col] = string(splitter[6])
+                    white[rank, col] = ""
+            end
+
         end
 
     end
@@ -564,11 +620,12 @@ function white_knight(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ knight_surround(rank, col)
-            if white[i[1], i[2]] == "N" && black[rank, col] == "" && white[rank, col] == ""
-                white[i[1], i[2]] = ""
-                white[rank, col] = "N"
-                break
-            end
+            if white[i[1], i[2]] == "N" && black[rank, col] == "" && white[rank, col] == "" &&
+                white_future(splitter[1], i[1], i[2], rank, col) == 1
+                    white[i[1], i[2]] = ""
+                    white[rank, col] = "N"
+                    break
+                end
         end
 
     elseif l == 4
@@ -578,11 +635,12 @@ function white_knight(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ knight_surround(rank,col)
-                if white[i[1], i[2]] == "N" && black[rank, col] != "" && white[rank, col] == ""
-                    white[i[1], i[2]] = ""
-                    white[rank, col] = "N"
-                    black[rank, col] = ""
-                    break
+                if white[i[1], i[2]] == "N" && black[rank, col] != "" && white[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "N"
+                        black[rank, col] = ""
+                        break
                 end
 
             end
@@ -595,7 +653,8 @@ function white_knight(move::String)
 
             for i ∈ knight_surround(rank, col)
                 if white[i[1], i[2]] == "N" && i[2] == og_col &&
-                    white[rank, col] == "" && black[rank, col] == ""
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
                         white[i[1], i[2]] = ""
                         white[rank, col] = "N"
                         break
@@ -610,7 +669,8 @@ function white_knight(move::String)
 
             for i ∈ knight_surround(rank, col)
                 if white[i[1], i[2]] == "N" && i[1] == og_rank &&
-                    white[rank, col] == "" && black[rank, col] == ""
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
                         white[i[1], i[2]] = ""
                         white[rank, col] = "N"
                         break
@@ -629,7 +689,8 @@ function white_knight(move::String)
 
                 for i ∈ knight_surround(rank, col)
                     if white[i[1], i[2]] == "N" && i[2] == og_col &&
-                        white[rank, col] == "" && black[rank, col] != ""
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
                             white[i[1], i[2]] = ""
                             white[rank, col] = "N"
                             black[rank, col] = ""
@@ -645,7 +706,8 @@ function white_knight(move::String)
 
                 for i ∈ knight_surround(rank, col)
                     if white[i[1], i[2]] == "N" && i[1] == og_rank &&
-                        white[rank, col] == "" && black[rank, col] != ""
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
                             white[i[1], i[2]] = ""
                             white[rank, col] = "N"
                             black[rank, col] = ""
@@ -664,7 +726,8 @@ function white_knight(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if white[og_rank, og_col] == "N" && white[rank, col] == "" &&
-                black[rank, col] == ""
+                black[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_col, rank, col) == 1
                     white[og_rank, og_col] = ""
                     white[rank, col] = "N"
             end
@@ -680,7 +743,8 @@ function white_knight(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if white[og_rank, og_col] == "N" && black[rank, col] != "" &&
-                white[rank, col] == ""
+                white[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_rank, rank, col) == 1
                     white[og_rank, og_col] = ""
                     white[rank, col] = "N"
                     black[rank, col] = ""
@@ -707,10 +771,11 @@ function black_knight(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ knight_surround(rank, col)
-            if black[i[1], i[2]] == "N" && white[rank, col] == "" && black[rank, col] == ""
-                black[i[1], i[2]] = ""
-                black[rank, col] = "N"
-                break
+            if black[i[1], i[2]] == "N" && white[rank, col] == "" && black[rank, col] == "" &&
+                black_future(splitter[1], i[1], i[2], rank, col) == 1
+                    black[i[1], i[2]] = ""
+                    black[rank, col] = "N"
+                    break
             end
         end
 
@@ -721,11 +786,12 @@ function black_knight(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ knight_surround(rank,col)
-                if black[i[1], i[2]] == "N" && white[rank, col] != "" && black[rank, col] == ""
-                    black[i[1], i[2]] = ""
-                    black[rank, col] = "N"
-                    white[rank, col] = ""
-                    break
+                if black[i[1], i[2]] == "N" && white[rank, col] != "" && black[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "N"
+                        white[rank, col] = ""
+                        break
                 end
 
             end
@@ -738,7 +804,8 @@ function black_knight(move::String)
 
             for i ∈ knight_surround(rank, col)
                 if black[i[1], i[2]] == "N" && i[2] == og_col &&
-                    black[rank, col] == "" && white[rank, col] == ""
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
                         black[i[1], i[2]] = ""
                         black[rank, col] = "N"
                         break
@@ -753,7 +820,8 @@ function black_knight(move::String)
 
             for i ∈ knight_surround(rank, col)
                 if black[i[1], i[2]] == "N" && i[1] == og_rank &&
-                    black[rank, col] == "" && white[rank, col] == ""
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
                         black[i[1], i[2]] = ""
                         black[rank, col] = "N"
                         break
@@ -772,7 +840,8 @@ function black_knight(move::String)
 
                 for i ∈ knight_surround(rank, col)
                     if black[i[1], i[2]] == "N" && i[2] == og_col &&
-                        black[rank, col] == "" && white[rank, col] != ""
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
                             black[i[1], i[2]] = ""
                             black[rank, col] = "N"
                             white[rank, col] = ""
@@ -788,7 +857,8 @@ function black_knight(move::String)
 
                 for i ∈ knight_surround(rank, col)
                     if black[i[1], i[2]] == "N" && i[1] == og_rank &&
-                        black[rank, col] == "" && white[rank, col] != ""
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
                             black[i[1], i[2]] = ""
                             black[rank, col] = "N"
                             white[rank, col] = ""
@@ -807,7 +877,8 @@ function black_knight(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if black[og_rank, og_col] == "N" && black[rank, col] == "" &&
-                white[rank, col] == ""
+                white[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
                     black[og_rank, og_col] = ""
                     black[rank, col] = "N"
             end
@@ -823,7 +894,8 @@ function black_knight(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if black[og_rank, og_col] == "N" && white[rank, col] != "" &&
-                black[rank, col] == ""
+                black[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
                     black[og_rank, og_col] = ""
                     black[rank, col] = "N"
                     white[rank, col] = ""
@@ -914,13 +986,14 @@ function white_bisharp(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ bisharp_surround(rank, col)
-            if white[i[1], i[2]] == "B" && black[rank, col] == "" && white[rank, col] == ""
+            if white[i[1], i[2]] == "B" && black[rank, col] == "" && white[rank, col] == "" &&
+                white_future(splitter[1], i[1], i[2], rank, col) == 1
 
-                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
-                    white[i[1], i[2]] = ""
-                    white[rank, col] = "B"
-                    break
-                end
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "B"
+                        break
+                    end
 
             end
         end
@@ -932,13 +1005,14 @@ function white_bisharp(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ bisharp_surround(rank,col)
-                if white[i[1], i[2]] == "B" && black[rank, col] != "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "B"
-                        black[rank, col] = ""
-                        break
-                    end
+                if white[i[1], i[2]] == "B" && black[rank, col] != "" && white[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "B"
+                            black[rank, col] = ""
+                            break
+                        end
                 end
 
             end
@@ -951,13 +1025,14 @@ function white_bisharp(move::String)
 
             for i ∈ bisharp_surround(rank, col)
                 if white[i[1], i[2]] == "B" && i[2] == og_col &&
-                    white[rank, col] == "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "B"
-                        break
-                    end
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "B"
+                            break
+                        end
                 end
             end
 
@@ -969,13 +1044,14 @@ function white_bisharp(move::String)
 
             for i ∈ bisharp_surround(rank, col)
                 if white[i[1], i[2]] == "B" && i[1] == og_rank &&
-                    white[rank, col] == "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "B"
-                        break
-                    end
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "B"
+                            break
+                        end
                 end
             end
 
@@ -991,14 +1067,15 @@ function white_bisharp(move::String)
 
                 for i ∈ bisharp_surround(rank, col)
                     if white[i[1], i[2]] == "B" && i[2] == og_col &&
-                        white[rank, col] == "" && black[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            white[i[1], i[2]] = ""
-                            white[rank, col] = "B"
-                            black[rank, col] = ""
-                            break
-                        end
+                                white[i[1], i[2]] = ""
+                                white[rank, col] = "B"
+                                black[rank, col] = ""
+                                break
+                            end
                     end
                 end
 
@@ -1010,14 +1087,15 @@ function white_bisharp(move::String)
 
                 for i ∈ bisharp_surround(rank, col)
                     if white[i[1], i[2]] == "B" && i[1] == og_rank &&
-                        white[rank, col] == "" && black[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            white[i[1], i[2]] = ""
-                            white[rank, col] = "B"
-                            black[rank, col] = ""
-                            break
-                        end
+                                white[i[1], i[2]] = ""
+                                white[rank, col] = "B"
+                                black[rank, col] = ""
+                                break
+                            end
                     end
                 end
                     
@@ -1032,13 +1110,14 @@ function white_bisharp(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if white[og_rank, og_col] == "B" && white[rank, col] == "" &&
-                black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                black[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank, col, og_rank, og_col)) == 0
 
-                    white[og_rank, og_col] = ""
-                    white[rank, col] = "B"
-                    
-                end
+                        white[og_rank, og_col] = ""
+                        white[rank, col] = "B"
+                        
+                    end
             end
             
         end
@@ -1052,13 +1131,14 @@ function white_bisharp(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if white[og_rank, og_col] == "B" && black[rank, col] != "" &&
-                white[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                white[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank, col, og_rank, og_col)) == 0
 
-                    white[og_rank, og_col] = ""
-                    white[rank, col] = "B"
-                    black[rank, col] = ""
-                end
+                        white[og_rank, og_col] = ""
+                        white[rank, col] = "B"
+                        black[rank, col] = ""
+                    end
             end
 
         end
@@ -1082,13 +1162,14 @@ function black_bisharp(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ bisharp_surround(rank, col)
-            if black[i[1], i[2]] == "B" && white[rank, col] == "" && black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+            if black[i[1], i[2]] == "B" && white[rank, col] == "" && black[rank, col] == "" &&
+                black_future(splitter[1], i[1], i[2], rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                    black[i[1], i[2]] = ""
-                    black[rank, col] = "B"
-                    break
-                end
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "B"
+                        break
+                    end
             end
         end
 
@@ -1099,14 +1180,15 @@ function black_bisharp(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ bisharp_surround(rank,col)
-                if black[i[1], i[2]] == "B" && white[rank, col] != "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                if black[i[1], i[2]] == "B" && white[rank, col] != "" && black[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "B"
-                        white[rank, col] = ""
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "B"
+                            white[rank, col] = ""
+                            break
+                        end
                 end
 
             end
@@ -1119,13 +1201,14 @@ function black_bisharp(move::String)
 
             for i ∈ bisharp_surround(rank, col)
                 if black[i[1], i[2]] == "B" && i[2] == og_col &&
-                    black[rank, col] == "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "B"
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "B"
+                            break
+                        end
                 end
             end
 
@@ -1137,13 +1220,14 @@ function black_bisharp(move::String)
 
             for i ∈ bisharp_surround(rank, col)
                 if black[i[1], i[2]] == "B" && i[1] == og_rank &&
-                    black[rank, col] == "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "B"
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "B"
+                            break
+                        end
                 end
             end
 
@@ -1159,14 +1243,15 @@ function black_bisharp(move::String)
 
                 for i ∈ bisharp_surround(rank, col)
                     if black[i[1], i[2]] == "B" && i[2] == og_col &&
-                        black[rank, col] == "" && white[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            black[i[1], i[2]] = ""
-                            black[rank, col] = "B"
-                            white[rank, col] = ""
-                            break
-                        end
+                                black[i[1], i[2]] = ""
+                                black[rank, col] = "B"
+                                white[rank, col] = ""
+                                break
+                            end
                     end
                 end
 
@@ -1178,14 +1263,15 @@ function black_bisharp(move::String)
 
                 for i ∈ bisharp_surround(rank, col)
                     if black[i[1], i[2]] == "B" && i[1] == og_rank &&
-                        black[rank, col] == "" && white[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            black[i[1], i[2]] = ""
-                            black[rank, col] = "B"
-                            white[rank, col] = ""
-                            break
-                        end
+                                black[i[1], i[2]] = ""
+                                black[rank, col] = "B"
+                                white[rank, col] = ""
+                                break
+                            end
                     end
                 end
                     
@@ -1200,12 +1286,13 @@ function black_bisharp(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if black[og_rank, og_col] == "B" && black[rank, col] == "" &&
-                white[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                white[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
-                    black[og_rank, og_col] = ""
-                    black[rank, col] = "B"
-                end
+                        black[og_rank, og_col] = ""
+                        black[rank, col] = "B"
+                    end
             end
             
         end
@@ -1219,13 +1306,14 @@ function black_bisharp(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if black[og_rank, og_col] == "B" && white[rank, col] != "" &&
-                black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                black[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
-                    black[og_rank, og_col] = ""
-                    black[rank, col] = "B"
-                    white[rank, col] = ""
-                end
+                        black[og_rank, og_col] = ""
+                        black[rank, col] = "B"
+                        white[rank, col] = ""
+                    end
             end
 
         end
@@ -1277,13 +1365,14 @@ function white_rook(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ rook_surround(rank, col)
-            if white[i[1], i[2]] == "R" && black[rank, col] == "" && white[rank, col] == ""
+            if white[i[1], i[2]] == "R" && black[rank, col] == "" && white[rank, col] == "" &&
+                white_future(splitter[1], i[1], i[2], rank, col) == 1
 
-                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
-                    white[i[1], i[2]] = ""
-                    white[rank, col] = "R"
-                    break
-                end
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "R"
+                        break
+                    end
 
             end
         end
@@ -1295,13 +1384,14 @@ function white_rook(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ rook_surround(rank,col)
-                if white[i[1], i[2]] == "R" && black[rank, col] != "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "R"
-                        black[rank, col] = ""
-                        break
-                    end
+                if white[i[1], i[2]] == "R" && black[rank, col] != "" && white[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "R"
+                            black[rank, col] = ""
+                            break
+                        end
                 end
 
             end
@@ -1314,13 +1404,14 @@ function white_rook(move::String)
 
             for i ∈ rook_surround(rank, col)
                 if white[i[1], i[2]] == "R" && i[2] == og_col &&
-                    white[rank, col] == "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "R"
-                        break
-                    end
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "R"
+                            break
+                        end
                 end
             end
 
@@ -1332,13 +1423,14 @@ function white_rook(move::String)
 
             for i ∈ rook_surround(rank, col)
                 if white[i[1], i[2]] == "R" && i[1] == og_rank &&
-                    white[rank, col] == "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "R"
-                        break
-                    end
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "R"
+                            break
+                        end
                 end
             end
 
@@ -1354,14 +1446,15 @@ function white_rook(move::String)
 
                 for i ∈ rook_surround(rank, col)
                     if white[i[1], i[2]] == "R" && i[2] == og_col &&
-                        white[rank, col] == "" && black[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            white[i[1], i[2]] = ""
-                            white[rank, col] = "R"
-                            black[rank, col] = ""
-                            break
-                        end
+                                white[i[1], i[2]] = ""
+                                white[rank, col] = "R"
+                                black[rank, col] = ""
+                                break
+                            end
                     end
                 end
 
@@ -1373,14 +1466,15 @@ function white_rook(move::String)
 
                 for i ∈ rook_surround(rank, col)
                     if white[i[1], i[2]] == "R" && i[1] == og_rank &&
-                        white[rank, col] == "" && black[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            white[i[1], i[2]] = ""
-                            white[rank, col] = "R"
-                            black[rank, col] = ""
-                            break
-                        end
+                                white[i[1], i[2]] = ""
+                                white[rank, col] = "R"
+                                black[rank, col] = ""
+                                break
+                            end
                     end
                 end
                     
@@ -1395,13 +1489,14 @@ function white_rook(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if white[og_rank, og_col] == "R" && white[rank, col] == "" &&
-                black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                black[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
-                    white[og_rank, og_col] = ""
-                    white[rank, col] = "R"
-                    
-                end
+                        white[og_rank, og_col] = ""
+                        white[rank, col] = "R"
+                        
+                    end
             end
             
         end
@@ -1415,7 +1510,8 @@ function white_rook(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if white[og_rank, og_col] == "R" && black[rank, col] != "" &&
-                white[rank, col] == ""
+                white[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_col, rank, col) == 1
                 if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
                     white[og_rank, og_col] = ""
@@ -1445,13 +1541,14 @@ function black_rook(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ rook_surround(rank, col)
-            if black[i[1], i[2]] == "R" && white[rank, col] == "" && black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+            if black[i[1], i[2]] == "R" && white[rank, col] == "" && black[rank, col] == "" &&
+                black_future(splitter[1], i[1], i[2], rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                    black[i[1], i[2]] = ""
-                    black[rank, col] = "R"
-                    break
-                end
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "R"
+                        break
+                    end
             end
         end
 
@@ -1462,14 +1559,15 @@ function black_rook(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ rook_surround(rank,col)
-                if black[i[1], i[2]] == "R" && white[rank, col] != "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                if black[i[1], i[2]] == "R" && white[rank, col] != "" && black[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "R"
-                        white[rank, col] = ""
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "R"
+                            white[rank, col] = ""
+                            break
+                        end
                 end
 
             end
@@ -1482,13 +1580,14 @@ function black_rook(move::String)
 
             for i ∈ rook_surround(rank, col)
                 if black[i[1], i[2]] == "R" && i[2] == og_col &&
-                    black[rank, col] == "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "R"
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "R"
+                            break
+                        end
                 end
             end
 
@@ -1500,13 +1599,14 @@ function black_rook(move::String)
 
             for i ∈ rook_surround(rank, col)
                 if black[i[1], i[2]] == "R" && i[1] == og_rank &&
-                    black[rank, col] == "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "R"
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "R"
+                            break
+                        end
                 end
             end
 
@@ -1522,14 +1622,15 @@ function black_rook(move::String)
 
                 for i ∈ rook_surround(rank, col)
                     if black[i[1], i[2]] == "R" && i[2] == og_col &&
-                        black[rank, col] == "" && white[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            black[i[1], i[2]] = ""
-                            black[rank, col] = "R"
-                            white[rank, col] = ""
-                            break
-                        end
+                                black[i[1], i[2]] = ""
+                                black[rank, col] = "R"
+                                white[rank, col] = ""
+                                break
+                            end
                     end
                 end
 
@@ -1541,14 +1642,15 @@ function black_rook(move::String)
 
                 for i ∈ rook_surround(rank, col)
                     if black[i[1], i[2]] == "R" && i[1] == og_rank &&
-                        black[rank, col] == "" && white[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            black[i[1], i[2]] = ""
-                            black[rank, col] = "R"
-                            white[rank, col] = ""
-                            break
-                        end
+                                black[i[1], i[2]] = ""
+                                black[rank, col] = "R"
+                                white[rank, col] = ""
+                                break
+                            end
                     end
                 end
                     
@@ -1563,12 +1665,13 @@ function black_rook(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if black[og_rank, og_col] == "R" && black[rank, col] == "" &&
-                white[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                white[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
-                    black[og_rank, og_col] = ""
-                    black[rank, col] = "R"
-                end
+                        black[og_rank, og_col] = ""
+                        black[rank, col] = "R"
+                    end
             end
             
         end
@@ -1582,13 +1685,14 @@ function black_rook(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if black[og_rank, og_col] == "R" && white[rank, col] != "" &&
-                black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                black[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
-                    black[og_rank, og_col] = ""
-                    black[rank, col] = "R"
-                    white[rank, col] = ""
-                end
+                        black[og_rank, og_col] = ""
+                        black[rank, col] = "R"
+                        white[rank, col] = ""
+                    end
             end
 
         end
@@ -1640,13 +1744,14 @@ function white_queen(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ queen_surround(rank, col)
-            if white[i[1], i[2]] == "Q" && black[rank, col] == "" && white[rank, col] == ""
+            if white[i[1], i[2]] == "Q" && black[rank, col] == "" && white[rank, col] == "" &&
+                white_future(splitter[1], i[1], i[2], rank, col) == 1
 
-                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
-                    white[i[1], i[2]] = ""
-                    white[rank, col] = "Q"
-                    break
-                end
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[i[1], i[2]] = ""
+                        white[rank, col] = "Q"
+                        break
+                    end
 
             end
         end
@@ -1658,13 +1763,14 @@ function white_queen(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ queen_surround(rank,col)
-                if white[i[1], i[2]] == "Q" && black[rank, col] != "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "Q"
-                        black[rank, col] = ""
-                        break
-                    end
+                if white[i[1], i[2]] == "Q" && black[rank, col] != "" && white[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "Q"
+                            black[rank, col] = ""
+                            break
+                        end
                 end
 
             end
@@ -1677,13 +1783,14 @@ function white_queen(move::String)
 
             for i ∈ queen_surround(rank, col)
                 if white[i[1], i[2]] == "Q" && i[2] == og_col &&
-                    white[rank, col] == "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "Q"
-                        break
-                    end
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "Q"
+                            break
+                        end
                 end
             end
 
@@ -1695,13 +1802,14 @@ function white_queen(move::String)
 
             for i ∈ queen_surround(rank, col)
                 if white[i[1], i[2]] == "Q" && i[1] == og_rank &&
-                    white[rank, col] == "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    white[rank, col] == "" && black[rank, col] == "" &&
+                    white_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        white[i[1], i[2]] = ""
-                        white[rank, col] = "Q"
-                        break
-                    end
+                            white[i[1], i[2]] = ""
+                            white[rank, col] = "Q"
+                            break
+                        end
                 end
             end
 
@@ -1717,14 +1825,15 @@ function white_queen(move::String)
 
                 for i ∈ queen_surround(rank, col)
                     if white[i[1], i[2]] == "Q" && i[2] == og_col &&
-                        white[rank, col] == "" && black[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            white[i[1], i[2]] = ""
-                            white[rank, col] = "Q"
-                            black[rank, col] = ""
-                            break
-                        end
+                                white[i[1], i[2]] = ""
+                                white[rank, col] = "Q"
+                                black[rank, col] = ""
+                                break
+                            end
                     end
                 end
 
@@ -1736,14 +1845,15 @@ function white_queen(move::String)
 
                 for i ∈ queen_surround(rank, col)
                     if white[i[1], i[2]] == "Q" && i[1] == og_rank &&
-                        white[rank, col] == "" && black[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        white[rank, col] == "" && black[rank, col] != "" &&
+                        white_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            white[i[1], i[2]] = ""
-                            white[rank, col] = "Q"
-                            black[rank, col] = ""
-                            break
-                        end
+                                white[i[1], i[2]] = ""
+                                white[rank, col] = "Q"
+                                black[rank, col] = ""
+                                break
+                            end
                     end
                 end
                     
@@ -1758,7 +1868,8 @@ function white_queen(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if white[og_rank, og_col] == "Q" && white[rank, col] == "" &&
-                black[rank, col] == ""
+                black[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_col, rank, col) == 1
                 if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
                     white[og_rank, og_col] = ""
@@ -1778,7 +1889,8 @@ function white_queen(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if white[og_rank, og_col] == "Q" && black[rank, col] != "" &&
-                white[rank, col] == ""
+                white[rank, col] == "" &&
+                white_future(splitter[1], og_rank, og_col, rank, col) == 1
                 if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
                     white[og_rank, og_col] = ""
@@ -1808,13 +1920,14 @@ function black_queen(move::String)
         rank = 9 - parse(Int, splitter[3])
 
         for i ∈ queen_surround(rank, col)
-            if black[i[1], i[2]] == "Q" && white[rank, col] == "" && black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+            if black[i[1], i[2]] == "Q" && white[rank, col] == "" && black[rank, col] == "" &&
+                black_future(splitter[1], i[1], i[2], rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                    black[i[1], i[2]] = ""
-                    black[rank, col] = "Q"
-                    break
-                end
+                        black[i[1], i[2]] = ""
+                        black[rank, col] = "Q"
+                        break
+                    end
             end
         end
 
@@ -1825,14 +1938,15 @@ function black_queen(move::String)
             rank = 9 - parse(Int, splitter[4])
 
             for i ∈ queen_surround(rank,col)
-                if black[i[1], i[2]] == "Q" && white[rank, col] != "" && black[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                if black[i[1], i[2]] == "Q" && white[rank, col] != "" && black[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "Q"
-                        white[rank, col] = ""
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "Q"
+                            white[rank, col] = ""
+                            break
+                        end
                 end
 
             end
@@ -1845,13 +1959,14 @@ function black_queen(move::String)
 
             for i ∈ queen_surround(rank, col)
                 if black[i[1], i[2]] == "Q" && i[2] == og_col &&
-                    black[rank, col] == "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "Q"
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "Q"
+                            break
+                        end
                 end
             end
 
@@ -1863,13 +1978,14 @@ function black_queen(move::String)
 
             for i ∈ queen_surround(rank, col)
                 if black[i[1], i[2]] == "Q" && i[1] == og_rank &&
-                    black[rank, col] == "" && white[rank, col] == ""
-                    if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                    black[rank, col] == "" && white[rank, col] == "" &&
+                    black_future(splitter[1], i[1], i[2], rank, col) == 1
+                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                        black[i[1], i[2]] = ""
-                        black[rank, col] = "Q"
-                        break
-                    end
+                            black[i[1], i[2]] = ""
+                            black[rank, col] = "Q"
+                            break
+                        end
                 end
             end
 
@@ -1885,14 +2001,15 @@ function black_queen(move::String)
 
                 for i ∈ queen_surround(rank, col)
                     if black[i[1], i[2]] == "Q" && i[2] == og_col &&
-                        black[rank, col] == "" && white[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            black[i[1], i[2]] = ""
-                            black[rank, col] = "Q"
-                            white[rank, col] = ""
-                            break
-                        end
+                                black[i[1], i[2]] = ""
+                                black[rank, col] = "Q"
+                                white[rank, col] = ""
+                                break
+                            end
                     end
                 end
 
@@ -1904,14 +2021,15 @@ function black_queen(move::String)
 
                 for i ∈ queen_surround(rank, col)
                     if black[i[1], i[2]] == "Q" && i[1] == og_rank &&
-                        black[rank, col] == "" && white[rank, col] != ""
-                        if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        black[rank, col] == "" && white[rank, col] != "" &&
+                        black_future(splitter[1], i[1], i[2], rank, col) == 1
+                            if line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
 
-                            black[i[1], i[2]] = ""
-                            black[rank, col] = "Q"
-                            white[rank, col] = ""
-                            break
-                        end
+                                black[i[1], i[2]] = ""
+                                black[rank, col] = "Q"
+                                white[rank, col] = ""
+                                break
+                            end
                     end
                 end
                     
@@ -1926,12 +2044,13 @@ function black_queen(move::String)
             rank = 9 - parse(Int, splitter[5])
 
             if black[og_rank, og_col] == "Q" && black[rank, col] == "" &&
-                white[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                white[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
-                    black[og_rank, og_col] = ""
-                    black[rank, col] = "Q"
-                end
+                        black[og_rank, og_col] = ""
+                        black[rank, col] = "Q"
+                    end
             end
             
         end
@@ -1945,13 +2064,14 @@ function black_queen(move::String)
             rank = 9 - parse(Int, splitter[6])
 
             if black[og_rank, og_col] == "Q" && white[rank, col] != "" &&
-                black[rank, col] == ""
-                if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
+                black[rank, col] == "" &&
+                black_future(splitter[1], og_rank, og_col, rank, col) == 1
+                    if line_of_sight(piece_interception(rank,col,og_rank,og_col)) == 0
 
-                    black[og_rank, og_col] = ""
-                    black[rank, col] = "Q"
-                    white[rank, col] = ""
-                end
+                        black[og_rank, og_col] = ""
+                        black[rank, col] = "Q"
+                        white[rank, col] = ""
+                    end
             end
 
         end
@@ -2200,6 +2320,9 @@ function black_castle(move::String)
 end
 
 
+########################### Legality Checks #############################3
+
+
 """
 white_check()
 
@@ -2207,17 +2330,43 @@ See if the white king is in check on those squares
 """
 function white_check(rank, col)
 
-    n_squares = knight_surround(rank, col)
-    n_len = length(n_squares)
     check = 0
 
-    if n_len != 0
-        for i ∈ n_squares
-            if black[i[1], i[2]] == "N"
-                check += 1
-                break
+    if rank > 2
+        if col ∈ 2:7
+            if black[rank - 1, col - 1] == "p" || black[rank - 1, col - 1] == "pe" ||
+                black[rank - 1, col + 1] == "p" || black[rank - 1, col + 1] == "pe"
+                    check += 1
             end
         end
+
+        if col == 1
+            if black[rank - 1, col + 1] == "p" || black[rank - 1, col + 1] == "pe"
+                    check += 1
+            end
+        end
+
+        if col == 8
+            if black[rank - 1, col - 1] == "p" || black[rank - 1, col - 1] == "pe"
+                check += 1
+            end
+        end
+    end
+
+    if check == 0
+
+        n_squares = knight_surround(rank, col)
+        n_len = length(n_squares)
+
+        if n_len != 0
+            for i ∈ n_squares
+                if black[i[1], i[2]] == "N"
+                    check += 1
+                    break
+                end
+            end
+        end
+
     end
 
 
@@ -2264,17 +2413,43 @@ See if the black king is in check on those squares
 """
 function black_check(rank, col)
 
-    n_squares = knight_surround(rank, col)
-    n_len = length(n_squares)
     check = 0
 
-    if n_len != 0
-        for i ∈ n_squares
-            if white[i[1], i[2]] == "N"
-                check += 1
-                break
+    if rank < 7
+        if col ∈ 2:7
+            if white[rank + 1, col - 1] == "p" || white[rank + 1, col - 1] == "pe" ||
+                white[rank + 1, col + 1] == "p" || white[rank + 1, col + 1] == "pe"
+                    check += 1
             end
         end
+
+        if col == 1
+            if white[rank + 1, col + 1] == "p" || white[rank + 1, col + 1] == "pe"
+                check += 1
+            end
+        end
+
+        if col == 8
+            if white[rank + 1, col - 1] == "p" || white[rank + 1, col - 1] == "pe"
+                check += 1
+            end
+        end
+    end
+
+    if check == 0
+
+        n_squares = knight_surround(rank, col)
+        n_len = length(n_squares)
+
+        if n_len != 0
+            for i ∈ n_squares
+                if white[i[1], i[2]] == "N"
+                    check += 1
+                    break
+                end
+            end
+        end
+
     end
 
 
@@ -2314,6 +2489,488 @@ function black_check(rank, col)
 end
 
 
+"""
+white_future()
+
+See if the white king is in check on a future move.
+This is only necessary when not directly moving the king as the check for king moves are already done
+"""
+function white_future(piece::String, og_rank::Int, og_col::Int, rank::Int, col::Int)
+    w_copy .= copy(white)
+    b_copy .= copy(black)
+
+    approve = 0
+
+    w_copy[og_rank, og_col] = ""
+    w_copy[rank, col] = piece
+    b_copy[rank, col] = ""
+
+    if white_future_check(w_king[1], w_king[2]) == 0
+        approve += 1
+    end
+
+    return approve
+end
+function white_future(piece::SubString{String}, og_rank::Int, og_col::Int, rank::Int, col::Int)
+    w_copy .= copy(white)
+    b_copy .= copy(black)
+
+    approve = 0
+
+    w_copy[og_rank, og_col] = ""
+    w_copy[rank, col] = piece
+    b_copy[rank, col] = ""
+
+    if white_future_check(w_king[1], w_king[2]) == 0
+        approve += 1
+    end
+
+    return approve
+end
+
+
+"""
+black_future()
+
+See if the black king is in check on a future move.
+This is only necessary when not directly moving the king as the check for king moves are already done
+"""
+function black_future(piece::String, og_rank::Int, og_col::Int, rank::Int, col::Int)
+    w_copy .= copy(white)
+    b_copy .= copy(black)
+
+    approve = 0
+
+    b_copy[og_rank, og_col] = ""
+    b_copy[rank, col] = piece
+    w_copy[rank, col] = ""
+
+    if black_future_check(b_king[1], b_king[2]) == 0
+        approve += 1
+    end
+
+    return approve
+end
+function black_future(piece::SubString{String}, og_rank::Int, og_col::Int, rank::Int, col::Int)
+    w_copy .= copy(white)
+    b_copy .= copy(black)
+
+    approve = 0
+
+    b_copy[og_rank, og_col] = ""
+    b_copy[rank, col] = piece
+    w_copy[rank, col] = ""
+
+    if black_future_check(b_king[1], b_king[2]) == 0
+        approve += 1
+    end
+
+    return approve
+end
+
+
+"""
+white_future_check()
+
+See if the white king is in check on those squares in the future
+"""
+function white_future_check(rank, col)
+
+    check = 0
+
+    if rank > 2
+        if col ∈ 2:7
+            if b_copy[rank - 1, col - 1] == "p" || b_copy[rank - 1, col - 1] == "pe" ||
+                b_copy[rank - 1, col + 1] == "p" || b_copy[rank - 1, col + 1] == "pe"
+                    check += 1
+            end
+        end
+
+        if col == 1
+            if b_copy[rank - 1, col + 1] == "p" || b_copy[rank - 1, col + 1] == "pe"
+                    check += 1
+            end
+        end
+
+        if col == 8
+            if b_copy[rank - 1, col - 1] == "p" || b_copy[rank - 1, col - 1] == "pe"
+                check += 1
+            end
+        end
+    end
+
+
+    if check == 0
+
+        n_squares = knight_surround(rank, col)
+        n_len = length(n_squares)
+
+        if n_len != 0
+            for i ∈ n_squares
+                if b_copy[i[1], i[2]] == "N"
+                    check += 1
+                    break
+                end
+            end
+        end
+
+    end
+
+
+    if check == 0
+
+        b_squares = bisharp_surround(rank, col)
+        b_len = length(b_squares)
+        if b_len != 0
+            for i ∈ b_squares
+                if b_copy[i[1], i[2]] == "B" || b_copy[i[1], i[2]] == "Q"
+                    if future_line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+
+    end
+
+    if check == 0
+        r_squares = rook_surround(rank, col)
+        r_len = length(r_squares)
+        if r_len != 0
+            for i ∈ r_squares
+                if b_copy[i[1], i[2]] == "R" || b_copy[i[1], i[2]] == "Q"
+                    if future_line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    return check
+end
+
+
+"""
+black_future_check()
+
+See if the black king is in check on those squares in the future
+"""
+function black_future_check(rank, col)
+
+    check = 0
+
+    if rank < 7
+        if col ∈ 2:7
+            if w_copy[rank + 1, col - 1] == "p" || w_copy[rank + 1, col - 1] == "pe" ||
+                w_copy[rank + 1, col + 1] == "p" || w_copy[rank + 1, col + 1] == "pe"
+                    check += 1
+            end
+        end
+
+        if col == 1
+            if w_copy[rank + 1, col + 1] == "p" || w_copy[rank + 1, col + 1] == "pe"
+                check += 1
+            end
+        end
+
+        if col == 8
+            if w_copy[rank + 1, col - 1] == "p" || w_copy[rank + 1, col - 1] == "pe"
+                check += 1
+            end
+        end
+    end
+
+
+    if check == 0
+
+        n_squares = knight_surround(rank, col)
+        n_len = length(n_squares)
+
+        if n_len != 0
+            for i ∈ n_squares
+                if w_copy[i[1], i[2]] == "N"
+                    check += 1
+                    break
+                end
+            end
+        end
+
+    end
+
+
+    if check == 0
+
+        b_squares = bisharp_surround(rank, col)
+        b_len = length(b_squares)
+        if b_len != 0
+            for i ∈ b_squares
+                if w_copy[i[1], i[2]] == "B" || w_copy[i[1], i[2]] == "Q"
+                    if future_line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+
+    end
+
+    if check == 0
+        r_squares = rook_surround(rank, col)
+        r_len = length(r_squares)
+        if r_len != 0
+            for i ∈ r_squares
+                if w_copy[i[1], i[2]] == "R" || w_copy[i[1], i[2]] == "Q"
+                    if future_line_of_sight(piece_interception(rank,col,i[1],i[2])) == 0
+                        check += 1
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    return check
+end
+
+
+"""
+future_line_of_sight()
+
+See if black or white can block the movement on a future move
+"""
+function future_line_of_sight(cept::Vector{Any})
+    l = length(cept)
+    count = 0
+    if l != 0
+
+        for i ∈ 1:l 
+            if w_copy[cept[i][1],cept[i][2]] != "" || b_copy[cept[i][1],cept[i][2]] != ""
+                count += 1
+                break
+            end
+
+        end
+    end
+
+    return count
+    
+end
+
+
+"""
+white_legal()
+
+Check all legal moves for white
+"""
+function white_legal()
+    moves = []
+    for i ∈ 1:8
+        for j ∈ 1:8
+
+            if white[i, j] == "p" && white[i - 1, j] == "" &&
+                black[i - 1, j] == "" &&
+                white_future("p", i, j, i - 1, j) == 1
+                    append!(moves, [[[i, j], [i - 1, j]]])
+            end
+
+            if i == 7
+                if white[i, j] == "p" && white[i - 1, j] == "" &&
+                    white[i - 2, j] == "" && black[i - 2, j] == "" &&
+                    black[i - 1, j] == "" &&
+                    white_future("p", i, j, i - 2, j) == 1
+                        append!(moves, [[[i, j], [i - 2, j]]])
+                end
+            end
+
+            if j == 1
+                if white[i, j] == "p" && white[i - 1, j + 1] == "" &&
+                    black[i - 1, j + 1] != "" &&
+                    white_future("p", i, j, i - 1, j + 1) == 1
+                        append!(moves, [[[i, j], [i - 1, j + 1]]])
+                end
+            end
+
+            if j == 8
+                if white[i, j] == "p" && white[i - 1, j - 1] == "" &&
+                    black[i - 1, j - 1] != "" &&
+                    white_future("p", i, j, i - 1, j - 1) == 1
+                        append!(moves, [[[i, j], [i - 1, j - 1]]])
+                end
+            end
+
+            if j ∈ 2:7
+                if white[i, j] == "p" && white[i - 1, j + 1] == "" &&
+                    black[i - 1, j + 1] != "" &&
+                    white_future("p", i, j, i - 1, j + 1) == 1
+                        append!(moves, [[[i, j], [i - 1, j + 1]]])
+                end
+
+                if white[i, j] == "p" && white[i - 1, j - 1] == "" &&
+                    black[i - 1, j - 1] != "" &&
+                    white_future("p", i, j, i - 1, j - 1) == 1
+                        append!(moves, [[[i, j], [i - 1, j - 1]]])
+                end
+            end
+
+            if white[i, j] == "N"
+                for l ∈ knight_surround(i, j)
+                    if white[l[1], l[2]] == "" && white_future("N", i, j, l[1], l[2]) == 1
+                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if white[i, j] == "B"
+                for l ∈ bisharp_surround(i, j)
+                    if white[l[1], l[2]] == "" && white_future("B", i, j, l[1], l[2]) == 1 &&
+                        line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
+                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if white[i, j] == "R"
+                for l ∈ rook_surround(i, j)
+                    if white[l[1], l[2]] == "" && white_future("R", i, j, l[1], l[2]) == 1 &&
+                        line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
+                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if white[i, j] == "Q"
+                for l ∈ queen_surround(i, j)
+                    if white[l[1], l[2]] == "" && white_future("Q", i, j, l[1], l[2]) == 1 &&
+                        line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
+                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if white[i, j] == "K"
+                for l ∈ king_surround(i, j)
+                    if white[l[1], l[2]] == "" && white_check(l[1], l[2]) == 0
+                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+
+        end
+    end
+
+    return moves
+end
+
+
+"""
+black_legal()
+
+Check all legal moves for black
+"""
+function black_legal()
+    moves = []
+    for i ∈ 1:8
+        for j ∈ 1:8
+
+            if black[i, j] == "p" && black[i + 1, j] == "" &&
+                white[i + 1, j] == "" &&
+                black_future("p", i, j, i + 1, j) == 1
+                    append!(moves, [[[i, j], [i + 1, j]]])
+            end
+
+            if i == 2
+                if black[i, j] == "p" && black[i + 1, j] == "" &&
+                    black[i + 2, j] == "" && white[i + 2, j] == "" &&
+                    white[i + 1, j] == "" &&
+                    black_future("p", i, j, i + 2, j) == 1
+                        append!(moves, [[[i, j], [i + 2, j]]])
+                end
+            end
+
+            if j == 1
+                if black[i, j] == "p" && black[i + 1, j + 1] == "" &&
+                    white[i + 1, j + 1] != "" &&
+                    black_future("p", i, j, i + 1, j + 1) == 1
+                        append!(moves, [[[i, j], [i + 1, j + 1]]])
+                end
+            end
+
+            if j == 8
+                if black[i, j] == "p" && black[i + 1, j - 1] == "" &&
+                    white[i + 1, j - 1] != "" &&
+                    black_future("p", i, j, i + 1, j - 1) == 1
+                        append!(moves, [[[i, j], [i + 1, j - 1]]])
+                end
+            end
+
+            if j ∈ 2:7
+                if black[i, j] == "p" && black[i + 1, j + 1] == "" &&
+                    white[i + 1, j + 1] != "" &&
+                    black_future("p", i, j, i + 1, j + 1) == 1
+                        append!(moves, [[[i, j], [i + 1, j + 1]]])
+                end
+
+                if black[i, j] == "p" && black[i + 1, j - 1] == "" &&
+                    white[i + 1, j - 1] != "" &&
+                    black_future("p", i, j, i + 1, j - 1) == 1
+                        append!(moves, [[[i, j], [i + 1, j - 1]]])
+                end
+            end
+
+            if black[i, j] == "N"
+                for l ∈ knight_surround(i, j)
+                    if black[l[1], l[2]] == "" && black_future("N", i, j, l[1], l[2]) == 1
+                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if black[i, j] == "B"
+                for l ∈ bisharp_surround(i, j)
+                    if black[l[1], l[2]] == "" && black_future("B", i, j, l[1], l[2]) == 1 &&
+                        line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
+                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if black[i, j] == "R"
+                for l ∈ rook_surround(i, j)
+                    if black[l[1], l[2]] == "" && black_future("R", i, j, l[1], l[2]) == 1 &&
+                        line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
+                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if black[i, j] == "Q"
+                for l ∈ queen_surround(i, j)
+                    if black[l[1], l[2]] == "" && black_future("Q", i, j, l[1], l[2]) == 1 &&
+                        line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
+                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+            if black[i, j] == "K"
+                for l ∈ king_surround(i, j)
+                    if black[l[1], l[2]] == "" && black_check(l[1], l[2]) == 0
+                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                    end
+                end
+            end
+
+
+        end
+    end
+
+    return moves
+end
 
 
 
@@ -2329,7 +2986,6 @@ white = ["" "" "" "" "" "" "" "";
     "p" "p" "p" "p" "p" "p" "p" "p";
     "" "N" "B" "Q" "K" "B" "N" "R"
 ]
-
 
 
 black = ["R" "N" "B" "Q" "K" "B" "N" "";
