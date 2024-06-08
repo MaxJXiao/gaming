@@ -2940,7 +2940,9 @@ function white_legal()
 
             if r_l == l && r_c == 1
                 if white[8, 6] == "" || white[8, 6] == "K"
-                    append!(moves, [[["O-O"]]])
+                    if black[8, 6] == ""
+                        append!(moves, [[["O-O"]]])
+                    end
                 end
             end
         end
@@ -2973,12 +2975,14 @@ function white_legal()
                 end
                 if r_l == l 
                     if white[8, 4] == "K" || white[8, 4] == ""
-                        if white[8, 1] == "R"
-                            if white[8, 2] == "" && black[8, 2] == ""
+                        if black[8, 4] == ""
+                            if white[8, 1] == "R"
+                                if white[8, 2] == "" && black[8, 2] == ""
+                                    append!(moves, [[["O-O-O"]]])
+                                end
+                            elseif r_c == 0 && white[8,2] == "R"
                                 append!(moves, [[["O-O-O"]]])
                             end
-                        elseif r_c == 0 && white[8,2] == "R"
-                            append!(moves, [[["O-O-O"]]])
                         end
                     elseif r_c == 1
                         append!(moves, [[["O-O-O"]]])
@@ -3136,7 +3140,9 @@ function black_legal()
 
             if r_l == l && r_c == 1
                 if black[1, 6] == "" || black[1, 6] == "K"
-                    append!(moves, [[["O-O"]]])
+                    if white[1, 6] == ""
+                        append!(moves, [[["O-O"]]])
+                    end
                 end
             end
         end
@@ -3169,12 +3175,15 @@ function black_legal()
                 end
                 if r_l == l 
                     if black[1, 4] == "K" || black[1, 4] == ""
-                        if black[1, 1] == "R"
-                            if black[1, 2] == "" && white[1, 2] == ""
+                        if white[1, 4] == ""
+                            if black[1, 1] == "R"
+                                if black[1, 2] == "" && white[1, 2] == ""
+                                    append!(moves, [[["O-O-O"]]])
+                                end
+                                
+                            elseif r_c == 0 && black[1,2] == "R"
                                 append!(moves, [[["O-O-O"]]])
                             end
-                        elseif r_c == 0 && black[1,2] == "R"
-                            append!(moves, [[["O-O-O"]]])
                         end
                     elseif r_c == 1
                         append!(moves, [[["O-O-O"]]])
