@@ -2793,7 +2793,7 @@ function future_line_of_sight(cept::Vector{Any})
     
 end
 
-
+########### need to check legality of enpassant and castles
 """
 white_legal()
 
@@ -2803,13 +2803,13 @@ function white_legal()
     moves = []
     for i ∈ 1:8
         for j ∈ 1:8
-
+            # move pawn 1
             if white[i, j] == "p" && white[i - 1, j] == "" &&
                 black[i - 1, j] == "" &&
                 white_future("p", i, j, i - 1, j) == 1
                     append!(moves, [[[i, j], [i - 1, j]]])
             end
-
+            # move pawn 2
             if i == 7
                 if white[i, j] == "p" && white[i - 1, j] == "" &&
                     white[i - 2, j] == "" && black[i - 2, j] == "" &&
@@ -2818,7 +2818,7 @@ function white_legal()
                         append!(moves, [[[i, j], [i - 2, j]]])
                 end
             end
-
+            # pawn captures right
             if j == 1
                 if white[i, j] == "p" && white[i - 1, j + 1] == "" &&
                     black[i - 1, j + 1] != "" &&
@@ -2826,7 +2826,7 @@ function white_legal()
                         append!(moves, [[[i, j], [i - 1, j + 1]]])
                 end
             end
-
+            # pawn captures left
             if j == 8
                 if white[i, j] == "p" && white[i - 1, j - 1] == "" &&
                     black[i - 1, j - 1] != "" &&
@@ -2834,7 +2834,7 @@ function white_legal()
                         append!(moves, [[[i, j], [i - 1, j - 1]]])
                 end
             end
-
+            # pawn captures either way
             if j ∈ 2:7
                 if white[i, j] == "p" && white[i - 1, j + 1] == "" &&
                     black[i - 1, j + 1] != "" &&
@@ -2848,6 +2848,24 @@ function white_legal()
                         append!(moves, [[[i, j], [i - 1, j - 1]]])
                 end
             end
+
+
+            ## En passant 
+
+            if i == 4 # black passantable is on rank 4
+                if black[i,j] == "pe"
+                    if j != 1 && white[i, j - 1] == "p" &&
+                        white_future("p", i, j - 1, i - 1, j) == 1
+                            append!(moves,[[[i, j - 1], [i - 1, j]]])
+                    end
+                    if j != 8 && white[i, j + 1] == "p" &&
+                        white_future("p", i, j + 1, i - 1, j) == 1
+                            append!(moves, [[[i, j + 1], [i - 1, j]]])
+                    end
+                end
+            end
+
+            ########
 
             if white[i, j] == "N"
                 for l ∈ knight_surround(i, j)
@@ -2892,6 +2910,81 @@ function white_legal()
                 end
             end
 
+
+        end
+    end
+
+    if w_castle[1] == 0
+        if w_rrook[1] == 0
+            l = length(w_king[2]:7)
+            r_l = 0
+
+            r_c = 0
+            for i ∈ w_king[2]:7
+                if black[8, i] == "" && white_check(8, i) == 0
+                    if white[8, i] == "K" || white[8, i] == "R" || white[8, i] == ""
+                        r_l += 1
+                        if white[8, i] == "R"
+                            r_c += 1
+                        end
+                    end
+                end
+            end
+
+
+
+            if white[8, 8] == "R"
+                r_c += 1
+            end
+
+
+            if r_l == l && r_c == 1
+                if white[8, 6] == "" || white[8, 6] == "K"
+                    append!(moves, [[["O-O"]]])
+                end
+            end
+        end
+
+        if w_lrook[1] == 0
+            if w_king[2] == 2
+                if white[8, 3] == "" && white[8, 4] == "" &&
+                    black[8, 3] == "" && black[8, 4] == "" &&
+                    white_check(8, 2) == 0 && white_check(8, 3) == 0
+                        if white[8, 1] == "R"
+                            append!(moves, [[["O-O-O"]]])
+                        end
+                end
+            elseif w_king[2] > 2
+                l = length(3:w_king[2])
+                r_l = 0
+
+                r_c = 0
+
+                for i ∈ 3:w_king[2]
+                    if black[8, i] == "" && white_check(8, i) == 0
+                        if white[8, i] == "K" || white[8, i] == "R" || white[8, i] == ""
+                            r_l += 1
+
+                            if white[8, i] == "R"
+                                r_c += 1
+                            end
+                        end
+                    end
+                end
+                if r_l == l 
+                    if white[8, 4] == "K" || white[8, 4] == ""
+                        if white[8, 1] == "R"
+                            if white[8, 2] == "" && black[8, 2] == ""
+                                append!(moves, [[["O-O-O"]]])
+                            end
+                        elseif r_c == 1
+                            append!(moves, [[["O-O-O"]]])
+                        elseif r_c == 0 && white[8,2] == "R"
+                            append!(moves, [[["O-O-O"]]])
+                        end
+                    end
+                end
+            end
 
         end
     end
@@ -2955,6 +3048,20 @@ function black_legal()
                 end
             end
 
+
+            if i == 5 # white passantable is on rank 5
+                if white[i,j] == "pe"
+                    if j != 1 && black[i, j - 1] == "p" &&
+                        black_future("p", i, j - 1, i + 1, j) == 1
+                            append!(moves,[[[i, j - 1], [i + 1, j]]])
+                    end
+                    if j != 8 && black[i, j + 1] == "p" &&
+                        black_future("p", i, j + 1, i + 1, j) == 1
+                            append!(moves, [[[i, j + 1], [i + 1, j]]])
+                    end
+                end
+            end
+
             if black[i, j] == "N"
                 for l ∈ knight_surround(i, j)
                     if black[l[1], l[2]] == "" && black_future("N", i, j, l[1], l[2]) == 1
@@ -2998,6 +3105,82 @@ function black_legal()
                 end
             end
 
+
+        end
+    end
+
+
+    if b_castle[1] == 0
+        if b_rrook[1] == 0
+            l = length(b_king[2]:7)
+            r_l = 0
+
+            r_c = 0
+            for i ∈ b_king[2]:7
+                if white[1, i] == "" && black_check(1, i) == 0
+                    if black[1, i] == "K" || black[1, i] == "R" || black[1, i] == ""
+                        r_l += 1
+                        if black[1, i] == "R"
+                            r_c += 1
+                        end
+                    end
+                end
+            end
+
+
+
+            if black[1, 8] == "R"
+                r_c += 1
+            end
+
+
+            if r_l == l && r_c == 1
+                if black[1, 6] == "" || black[1, 6] == "K"
+                    append!(moves, [[["O-O"]]])
+                end
+            end
+        end
+
+        if b_lrook[1] == 0
+            if b_king[2] == 2
+                if black[1, 3] == "" && black[1, 4] == "" &&
+                    white[1, 3] == "" && white[1, 4] == "" &&
+                    black_check(1, 2) == 0 && black_check(1, 3) == 0
+                        if black[1, 1] == "R"
+                            append!(moves, [[["O-O-O"]]])
+                        end
+                end
+            elseif b_king[2] > 2
+                l = length(3:b_king[2])
+                r_l = 0
+
+                r_c = 0
+
+                for i ∈ 3:b_king[2]
+                    if white[1, i] == "" && black_check(1, i) == 0
+                        if black[1, i] == "K" || black[1, i] == "R" || black[1, i] == ""
+                            r_l += 1
+
+                            if black[1, i] == "R"
+                                r_c += 1
+                            end
+                        end
+                    end
+                end
+                if r_l == l 
+                    if black[1, 4] == "K" || black[1, 4] == ""
+                        if black[1, 1] == "R"
+                            if black[1, 2] == "" && white[1, 2] == ""
+                                append!(moves, [[["O-O-O"]]])
+                            end
+                        elseif r_c == 1
+                            append!(moves, [[["O-O-O"]]])
+                        elseif r_c == 0 && black[1,2] == "R"
+                            append!(moves, [[["O-O-O"]]])
+                        end
+                    end
+                end
+            end
 
         end
     end
