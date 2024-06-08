@@ -2299,7 +2299,7 @@ function black_castle(move::String)
                 end
             end
         elseif move == "O-O-O" && b_lrook[1] == 0
-            if white[1,4] == "" && white[1,3] == "" && white[1,2] == ""
+            if white[1,4] == "" && white[1,3] == "" && white[1,2] == "" &&
                 black[1,4] == "" && black[1,3] == "" && black[1,2] == ""
                 if black_check(1,5) == 0 && black_check(1,4) == 0 &&
                     black_check(1,3) == 0
@@ -2361,6 +2361,22 @@ function white_check(rank, col)
         if n_len != 0
             for i ∈ n_squares
                 if black[i[1], i[2]] == "N"
+                    check += 1
+                    break
+                end
+            end
+        end
+
+    end
+
+    if check == 0
+
+        k_squares = king_surround(rank, col)
+        k_len = length(k_squares)
+
+        if k_len != 0
+            for i ∈ k_squares
+                if black[i[1], i[2]] == "K"
                     check += 1
                     break
                 end
@@ -2444,6 +2460,23 @@ function black_check(rank, col)
         if n_len != 0
             for i ∈ n_squares
                 if white[i[1], i[2]] == "N"
+                    check += 1
+                    break
+                end
+            end
+        end
+
+    end
+
+
+    if check == 0
+
+        k_squares = king_surround(rank, col)
+        k_len = length(k_squares)
+
+        if k_len != 0
+            for i ∈ k_squares
+                if white[i[1], i[2]] == "K"
                     check += 1
                     break
                 end
@@ -2980,21 +3013,21 @@ end
 white = ["" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
-    "" "B" "" "B" "" "N" "" "";
     "" "" "" "" "" "" "" "";
-    "" "B" "" "B" "" "N" "" "";
-    "p" "p" "p" "p" "p" "p" "p" "p";
-    "" "N" "B" "Q" "K" "B" "N" "R"
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "K" "" ""
 ]
 
 
-black = ["R" "N" "B" "Q" "K" "B" "N" "";
-"p" "p" "p" "p" "p" "p" "p" "p";
+black = ["" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
-"" "" "p" "p" "" "" "" "";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
+"" "" "" "" "" "K" "" "";
+"" "" "" "" "" "p" "" "";
 "" "" "" "" "" "" "" ""
 ]
 

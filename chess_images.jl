@@ -74,7 +74,7 @@ function reset_white_board()
 end
 
 function reset_black_board()
-    blackpgn .= copy(white_board)
+    blackpgn .= copy(black_board)
 end
 
 
