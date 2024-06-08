@@ -2977,11 +2977,11 @@ function white_legal()
                             if white[8, 2] == "" && black[8, 2] == ""
                                 append!(moves, [[["O-O-O"]]])
                             end
-                        elseif r_c == 1
-                            append!(moves, [[["O-O-O"]]])
                         elseif r_c == 0 && white[8,2] == "R"
                             append!(moves, [[["O-O-O"]]])
                         end
+                    elseif r_c == 1
+                        append!(moves, [[["O-O-O"]]])
                     end
                 end
             end
@@ -3173,11 +3173,11 @@ function black_legal()
                             if black[1, 2] == "" && white[1, 2] == ""
                                 append!(moves, [[["O-O-O"]]])
                             end
-                        elseif r_c == 1
-                            append!(moves, [[["O-O-O"]]])
                         elseif r_c == 0 && black[1,2] == "R"
                             append!(moves, [[["O-O-O"]]])
                         end
+                    elseif r_c == 1
+                        append!(moves, [[["O-O-O"]]])
                     end
                 end
             end
