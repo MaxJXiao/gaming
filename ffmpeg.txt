@@ -9,9 +9,11 @@ ffmpeg -r 50 -i "%10d.png" -c:v libx264 -crf 0 "../movie.mp4"
 
 -r 50 means 50 frames per second, default is 25
 
+ffmpeg -r 1 -i "%d.png" -c:v libx264 -crf 10 "../movie.mp4"
+
 .../ means in directory before current
 
 
 ## gif maker (1.5 frames per second can lower)
 
-ffmpeg -r 1.5 -i image-%d.png output.gif
+ffmpeg -r 1.5 -i image-%d.png "../output.gif"

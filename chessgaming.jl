@@ -222,7 +222,7 @@ run_auto_chess()
 Run a game of chess completely randomly
 """
 function run_auto_chess(total_turns::Int)
-    
+
     board_reset()
 
     for i ∈ 1:total_turns
@@ -298,3 +298,60 @@ function run_auto_chess960(total_turns::Int)
 
 
 end
+
+
+
+
+"""
+save_auto_chess()
+
+Save a game of chess played randomly
+"""
+function save_auto_chess(total_games::Int, total_turns::Int)
+
+    total_pics = 2*total_turns
+
+    for i ∈ 1:total_games
+
+        board_reset()
+
+
+
+        for j ∈ 1:total_pics
+        
+            if j % 2 == 1
+                if white_state() == 1
+                    white_random_move()
+                else
+                    pic1, pic2, pic3 = j, j + 1, j + 2
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic2.png"), whitepgn)
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic3.png"), whitepgn)
+                    break
+                end
+            elseif j % 2 == 0
+                if black_state() == 1
+                    black_random_move()
+                else
+                    pic1, pic2, pic3 = j, j + 1, j + 2
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic2.png"), whitepgn)
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic3.png"), whitepgn)
+                    break
+                end
+            end
+
+            draw_white_pgn()
+
+            save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$j.png"), whitepgn)
+
+
+        end
+
+
+
+    end
+
+
+end
+

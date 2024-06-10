@@ -2538,7 +2538,11 @@ function white_future(piece::String, og_rank::Int, og_col::Int, rank::Int, col::
     w_copy[rank, col] = piece
     b_copy[rank, col] = ""
 
-    if white_future_check(w_king[1], w_king[2]) == 0
+    if string(piece) == "K"
+        if white_future_check(rank, col) == 0
+            approve += 1
+        end
+    elseif white_future_check(w_king[1], w_king[2]) == 0
         approve += 1
     end
 
@@ -2554,7 +2558,11 @@ function white_future(piece::SubString{String}, og_rank::Int, og_col::Int, rank:
     w_copy[rank, col] = piece
     b_copy[rank, col] = ""
 
-    if white_future_check(w_king[1], w_king[2]) == 0
+    if string(piece) == "K"
+        if white_future_check(rank, col) == 0
+            approve += 1
+        end
+    elseif white_future_check(w_king[1], w_king[2]) == 0
         approve += 1
     end
 
@@ -2578,7 +2586,11 @@ function black_future(piece::String, og_rank::Int, og_col::Int, rank::Int, col::
     b_copy[rank, col] = piece
     w_copy[rank, col] = ""
 
-    if black_future_check(b_king[1], b_king[2]) == 0
+    if string(piece) == "K"
+        if black_future_check(rank, col) == 0
+            approve += 1
+        end
+    elseif black_future_check(b_king[1], b_king[2]) == 0
         approve += 1
     end
 
@@ -2594,7 +2606,11 @@ function black_future(piece::SubString{String}, og_rank::Int, og_col::Int, rank:
     b_copy[rank, col] = piece
     w_copy[rank, col] = ""
 
-    if black_future_check(b_king[1], b_king[2]) == 0
+    if string(piece) == "K"
+        if black_future_check(rank, col) == 0
+            approve += 1
+        end
+    elseif black_future_check(b_king[1], b_king[2]) == 0
         approve += 1
     end
 
@@ -2648,6 +2664,23 @@ function white_future_check(rank, col)
         end
 
     end
+
+    if check == 0
+
+        k_squares = king_surround(rank, col)
+        k_len = length(k_squares)
+
+        if k_len != 0
+            for i ∈ k_squares
+                if b_copy[i[1], i[2]] == "K"
+                    check += 1
+                    break
+                end
+            end
+        end
+
+    end
+
 
 
     if check == 0
@@ -2725,6 +2758,23 @@ function black_future_check(rank, col)
         if n_len != 0
             for i ∈ n_squares
                 if w_copy[i[1], i[2]] == "N"
+                    check += 1
+                    break
+                end
+            end
+        end
+
+    end
+
+
+    if check == 0
+
+        k_squares = king_surround(rank, col)
+        k_len = length(k_squares)
+
+        if k_len != 0
+            for i ∈ k_squares
+                if w_copy[i[1], i[2]] == "K"
                     check += 1
                     break
                 end
@@ -2904,7 +2954,7 @@ function white_legal()
 
             if white[i, j] == "K"
                 for l ∈ king_surround(i, j)
-                    if white[l[1], l[2]] == "" && white_check(l[1], l[2]) == 0
+                    if white[l[1], l[2]] == "" && white_future("K", i, j, l[1], l[2]) == 1
                         append!(moves, [[["K"], [i, j], [l[1], l[2]]]])
                     end
                 end
@@ -3103,7 +3153,7 @@ function black_legal()
 
             if black[i, j] == "K"
                 for l ∈ king_surround(i, j)
-                    if black[l[1], l[2]] == "" && black_check(l[1], l[2]) == 0
+                    if black[l[1], l[2]] == "" && black_future("K", i, j, l[1], l[2]) == 1
                         append!(moves, [[["K"], [i, j], [l[1], l[2]]]])
                     end
                 end
@@ -3235,7 +3285,7 @@ end
 
 
 """
-white_automove())
+white_automove()
 
 For white, move using the format of a legal move.
 """
@@ -3302,7 +3352,10 @@ function white_automove(vec::AbstractVector)
             white[og_rank, og_col] = ""
             white[rank, col] = string(vec[1][1])
             black[rank, col] = ""
+
             w_castle[1] += 1
+            w_king[1] = rank
+            w_king[2] = col
 
         else
             og_rank = vec[2][1]
@@ -3310,9 +3363,17 @@ function white_automove(vec::AbstractVector)
             rank = vec[3][1]
             col = vec[3][2]
 
-            white[og_rank, og_col] = ""
-            white[rank, col] = string(vec[1][1])
-            black[rank, col] = ""
+            if string(vec[1][1]) == "p" && rank == 1
+
+                white[og_rank, og_col] = ""
+                white[rank, col] = "Q"
+                black[rank, col] = ""
+
+            else
+                white[og_rank, og_col] = ""
+                white[rank, col] = string(vec[1][1])
+                black[rank, col] = ""
+            end
             
         end
 
@@ -3323,7 +3384,7 @@ end
 
 
 """
-black_automove())
+black_automove()
 
 For black, move using the format of a legal move.
 """
@@ -3392,15 +3453,26 @@ function black_automove(vec::AbstractVector)
             white[rank, col] = ""
             b_castle[1] += 1
 
+            b_king[1] = rank
+            b_king[2] = col
+            
         else
             og_rank = vec[2][1]
             og_col = vec[2][2]
             rank = vec[3][1]
             col = vec[3][2]
 
-            black[og_rank, og_col] = ""
-            black[rank, col] = string(vec[1][1])
-            white[rank, col] = ""
+            if string(vec[1][1]) == "p" && rank == 8
+
+                black[og_rank, og_col] = ""
+                black[rank, col] = "Q"
+                white[rank, col] = ""
+
+            else
+                black[og_rank, og_col] = ""
+                black[rank, col] = string(vec[1][1])
+                white[rank, col] = ""
+            end
             
         end
 
@@ -3416,12 +3488,12 @@ white_random_move()
 Make a random move for white.
 """
 function white_random_move()
-    if white_state() == 1
-        choices = white_legal()
-        l = length(choices)
-        ran = rand(1:l)
-        white_automove(choices[ran])
-    end
+
+    choices = white_legal()
+    l = length(choices)
+    ran = rand(1:l)
+    white_automove(choices[ran])
+
 end
 
 
@@ -3431,12 +3503,12 @@ black_random_move()
 Make a random move for black.
 """
 function black_random_move()
-    if black_state() == 1
-        choices = black_legal()
-        l = length(choices)
-        ran = rand(1:l)
-        black_automove(choices[ran])
-    end
+
+    choices = black_legal()
+    l = length(choices)
+    ran = rand(1:l)
+    black_automove(choices[ran])
+
 end
 
 
