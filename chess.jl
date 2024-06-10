@@ -2807,7 +2807,7 @@ function white_legal()
             if white[i, j] == "p" && white[i - 1, j] == "" &&
                 black[i - 1, j] == "" &&
                 white_future("p", i, j, i - 1, j) == 1
-                    append!(moves, [[[i, j], [i - 1, j]]])
+                    append!(moves, [[["p"], [i, j], [i - 1, j]]])
             end
             # move pawn 2
             if i == 7
@@ -2815,7 +2815,7 @@ function white_legal()
                     white[i - 2, j] == "" && black[i - 2, j] == "" &&
                     black[i - 1, j] == "" &&
                     white_future("p", i, j, i - 2, j) == 1
-                        append!(moves, [[[i, j], [i - 2, j]]])
+                        append!(moves, [[["p"], [i, j], [i - 2, j]]])
                 end
             end
             # pawn captures right
@@ -2823,7 +2823,7 @@ function white_legal()
                 if white[i, j] == "p" && white[i - 1, j + 1] == "" &&
                     black[i - 1, j + 1] != "" &&
                     white_future("p", i, j, i - 1, j + 1) == 1
-                        append!(moves, [[[i, j], [i - 1, j + 1]]])
+                        append!(moves, [[["p"], [i, j], [i - 1, j + 1]]])
                 end
             end
             # pawn captures left
@@ -2831,7 +2831,7 @@ function white_legal()
                 if white[i, j] == "p" && white[i - 1, j - 1] == "" &&
                     black[i - 1, j - 1] != "" &&
                     white_future("p", i, j, i - 1, j - 1) == 1
-                        append!(moves, [[[i, j], [i - 1, j - 1]]])
+                        append!(moves, [[["p"], [i, j], [i - 1, j - 1]]])
                 end
             end
             # pawn captures either way
@@ -2839,13 +2839,13 @@ function white_legal()
                 if white[i, j] == "p" && white[i - 1, j + 1] == "" &&
                     black[i - 1, j + 1] != "" &&
                     white_future("p", i, j, i - 1, j + 1) == 1
-                        append!(moves, [[[i, j], [i - 1, j + 1]]])
+                        append!(moves, [[["p"], [i, j], [i - 1, j + 1]]])
                 end
 
                 if white[i, j] == "p" && white[i - 1, j - 1] == "" &&
                     black[i - 1, j - 1] != "" &&
                     white_future("p", i, j, i - 1, j - 1) == 1
-                        append!(moves, [[[i, j], [i - 1, j - 1]]])
+                        append!(moves, [[["p"], [i, j], [i - 1, j - 1]]])
                 end
             end
 
@@ -2856,11 +2856,11 @@ function white_legal()
                 if black[i,j] == "pe"
                     if j != 1 && white[i, j - 1] == "p" &&
                         white_future("p", i, j - 1, i - 1, j) == 1
-                            append!(moves,[[[i, j - 1], [i - 1, j]]])
+                            append!(moves,[[["px"], [i, j - 1], [i - 1, j]]])
                     end
                     if j != 8 && white[i, j + 1] == "p" &&
                         white_future("p", i, j + 1, i - 1, j) == 1
-                            append!(moves, [[[i, j + 1], [i - 1, j]]])
+                            append!(moves, [[["px"], [i, j + 1], [i - 1, j]]])
                     end
                 end
             end
@@ -2870,7 +2870,7 @@ function white_legal()
             if white[i, j] == "N"
                 for l ∈ knight_surround(i, j)
                     if white[l[1], l[2]] == "" && white_future("N", i, j, l[1], l[2]) == 1
-                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                        append!(moves, [[["N"] ,[i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -2879,7 +2879,7 @@ function white_legal()
                 for l ∈ bisharp_surround(i, j)
                     if white[l[1], l[2]] == "" && white_future("B", i, j, l[1], l[2]) == 1 &&
                         line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
-                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                            append!(moves, [[["B"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -2888,7 +2888,7 @@ function white_legal()
                 for l ∈ rook_surround(i, j)
                     if white[l[1], l[2]] == "" && white_future("R", i, j, l[1], l[2]) == 1 &&
                         line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
-                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                            append!(moves, [[["R"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -2897,7 +2897,7 @@ function white_legal()
                 for l ∈ queen_surround(i, j)
                     if white[l[1], l[2]] == "" && white_future("Q", i, j, l[1], l[2]) == 1 &&
                         line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
-                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                            append!(moves, [[["Q"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -2905,7 +2905,7 @@ function white_legal()
             if white[i, j] == "K"
                 for l ∈ king_surround(i, j)
                     if white[l[1], l[2]] == "" && white_check(l[1], l[2]) == 0
-                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                        append!(moves, [[["K"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -3010,7 +3010,7 @@ function black_legal()
             if black[i, j] == "p" && black[i + 1, j] == "" &&
                 white[i + 1, j] == "" &&
                 black_future("p", i, j, i + 1, j) == 1
-                    append!(moves, [[[i, j], [i + 1, j]]])
+                    append!(moves, [[["p"], [i, j], [i + 1, j]]])
             end
 
             if i == 2
@@ -3018,7 +3018,7 @@ function black_legal()
                     black[i + 2, j] == "" && white[i + 2, j] == "" &&
                     white[i + 1, j] == "" &&
                     black_future("p", i, j, i + 2, j) == 1
-                        append!(moves, [[[i, j], [i + 2, j]]])
+                        append!(moves, [[["p"], [i, j], [i + 2, j]]])
                 end
             end
 
@@ -3026,7 +3026,7 @@ function black_legal()
                 if black[i, j] == "p" && black[i + 1, j + 1] == "" &&
                     white[i + 1, j + 1] != "" &&
                     black_future("p", i, j, i + 1, j + 1) == 1
-                        append!(moves, [[[i, j], [i + 1, j + 1]]])
+                        append!(moves, [[["p"], [i, j], [i + 1, j + 1]]])
                 end
             end
 
@@ -3034,7 +3034,7 @@ function black_legal()
                 if black[i, j] == "p" && black[i + 1, j - 1] == "" &&
                     white[i + 1, j - 1] != "" &&
                     black_future("p", i, j, i + 1, j - 1) == 1
-                        append!(moves, [[[i, j], [i + 1, j - 1]]])
+                        append!(moves, [[["p"], [i, j], [i + 1, j - 1]]])
                 end
             end
 
@@ -3042,13 +3042,13 @@ function black_legal()
                 if black[i, j] == "p" && black[i + 1, j + 1] == "" &&
                     white[i + 1, j + 1] != "" &&
                     black_future("p", i, j, i + 1, j + 1) == 1
-                        append!(moves, [[[i, j], [i + 1, j + 1]]])
+                        append!(moves, [[["p"], [i, j], [i + 1, j + 1]]])
                 end
 
                 if black[i, j] == "p" && black[i + 1, j - 1] == "" &&
                     white[i + 1, j - 1] != "" &&
                     black_future("p", i, j, i + 1, j - 1) == 1
-                        append!(moves, [[[i, j], [i + 1, j - 1]]])
+                        append!(moves, [[["p"], [i, j], [i + 1, j - 1]]])
                 end
             end
 
@@ -3057,11 +3057,11 @@ function black_legal()
                 if white[i,j] == "pe"
                     if j != 1 && black[i, j - 1] == "p" &&
                         black_future("p", i, j - 1, i + 1, j) == 1
-                            append!(moves,[[[i, j - 1], [i + 1, j]]])
+                            append!(moves,[[["px"], [i, j - 1], [i + 1, j]]])
                     end
                     if j != 8 && black[i, j + 1] == "p" &&
                         black_future("p", i, j + 1, i + 1, j) == 1
-                            append!(moves, [[[i, j + 1], [i + 1, j]]])
+                            append!(moves, [[["px"], [i, j + 1], [i + 1, j]]])
                     end
                 end
             end
@@ -3069,7 +3069,7 @@ function black_legal()
             if black[i, j] == "N"
                 for l ∈ knight_surround(i, j)
                     if black[l[1], l[2]] == "" && black_future("N", i, j, l[1], l[2]) == 1
-                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                        append!(moves, [[["N"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -3078,7 +3078,7 @@ function black_legal()
                 for l ∈ bisharp_surround(i, j)
                     if black[l[1], l[2]] == "" && black_future("B", i, j, l[1], l[2]) == 1 &&
                         line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
-                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                            append!(moves, [[["B"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -3087,7 +3087,7 @@ function black_legal()
                 for l ∈ rook_surround(i, j)
                     if black[l[1], l[2]] == "" && black_future("R", i, j, l[1], l[2]) == 1 &&
                         line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
-                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                            append!(moves, [[["R"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -3096,7 +3096,7 @@ function black_legal()
                 for l ∈ queen_surround(i, j)
                     if black[l[1], l[2]] == "" && black_future("Q", i, j, l[1], l[2]) == 1 &&
                         line_of_sight(piece_interception(i, j, l[1], l[2])) == 0
-                            append!(moves, [[[i, j], [l[1], l[2]]]])
+                            append!(moves, [[["Q"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -3104,7 +3104,7 @@ function black_legal()
             if black[i, j] == "K"
                 for l ∈ king_surround(i, j)
                     if black[l[1], l[2]] == "" && black_check(l[1], l[2]) == 0
-                        append!(moves, [[[i, j], [l[1], l[2]]]])
+                        append!(moves, [[["K"], [i, j], [l[1], l[2]]]])
                     end
                 end
             end
@@ -3196,6 +3196,251 @@ function black_legal()
 
     return moves
 end
+
+
+"""
+white_state()
+
+For white, check if stalemate, checkmate or normal position
+"""
+function white_state()
+    if length(white_legal()) == 0
+        if white_check(w_king[1], w_king[2]) == 1
+            return -200
+        elseif white_check(w_king[1], w_king[2]) == 0
+            return 0
+        end
+    else
+        return 1
+    end
+end
+
+
+"""
+black_state()
+
+For black, check if stalemate, checkmate or normal position
+"""
+function black_state()
+    if length(black_legal()) == 0
+        if black_check(b_king[1], b_king[2]) == 1
+            return -200
+        elseif black_check(b_king[1], b_king[2]) == 0
+            return 0
+        end
+    else
+        return 1
+    end
+end
+
+
+"""
+white_automove())
+
+For white, move using the format of a legal move.
+"""
+function white_automove(vec::AbstractVector)
+    l = length(vec)
+    if l == 1 && w_castle[1] == 0
+        if string(vec[1][1]) == "O-O" && w_rrook[1] == 0
+            for i ∈ w_king[2]:8
+                if white[8, i] == "R"
+                    white[8, i] = ""
+                end
+            end
+            white[8, w_king[2]] = ""
+            white[8, 7] = "K"
+            white[8, 6] = "R"
+            w_king[2] = 7
+            w_castle[1] += 200
+        elseif string(vec[1][1]) == "O-O-O" && w_lrook[1] == 0
+            for i ∈ 1:w_king[2]
+                if white[8, i] == "R"
+                    white[8, i] = ""
+                end
+            end
+            white[8, w_king[2]] = ""
+            white[8, 3] = "K"
+            white[8, 4] = "R"
+            w_king[2] = 3
+            w_castle[1] += 200
+        end
+
+    elseif l == 3
+        if string(vec[1][1]) == "px"
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+            
+            white[og_rank, og_col] = ""
+            white[rank, col] = "p"
+            black[og_rank, col] = ""
+
+        elseif string(vec[1][1]) == "R" && w_castle[1] == 0
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+
+            white[og_rank, og_col] = ""
+            white[rank, col] = string(vec[1][1])
+            black[rank, col] = ""
+
+            if og_rank > w_king[2]
+                w_rrook[1] += 1
+            elseif og_rank < w_king[2]
+                w_lrook[1] += 1
+            end
+
+        elseif string(vec[1][1]) == "K"
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+
+            white[og_rank, og_col] = ""
+            white[rank, col] = string(vec[1][1])
+            black[rank, col] = ""
+            w_castle[1] += 1
+
+        else
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+
+            white[og_rank, og_col] = ""
+            white[rank, col] = string(vec[1][1])
+            black[rank, col] = ""
+            
+        end
+
+    end
+
+    remove_black_enpassant()
+end
+
+
+"""
+black_automove())
+
+For black, move using the format of a legal move.
+"""
+function black_automove(vec::AbstractVector)
+    l = length(vec)
+    if l == 1 && b_castle[1] == 0
+        if string(vec[1][1]) == "O-O" && b_rrook[1] == 0
+            for i ∈ b_king[2]:8
+                if black[1, i] == "R"
+                    black[1, i] = ""
+                end
+            end
+            black[1, b_king[2]] = ""
+            black[1, 7] = "K"
+            black[1, 6] = "R"
+            b_king[2] = 7
+            b_castle[1] += 200
+        elseif string(vec[1][1]) == "O-O-O" && b_lrook[1] == 0
+            for i ∈ 1:b_king[2]
+                if black[1, i] == "R"
+                    black[1, i] = ""
+                end
+            end
+            black[1, b_king[2]] = ""
+            black[1, 3] = "K"
+            black[8, 4] = "R"
+            b_king[2] = 3
+            b_castle[1] += 200
+        end
+
+    elseif l == 3
+        if string(vec[1][1]) == "px"
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+            
+            black[og_rank, og_col] = ""
+            black[rank, col] = "p"
+            white[og_rank, col] = ""
+
+        elseif string(vec[1][1]) == "R" && w_castle[1] == 0
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+
+            black[og_rank, og_col] = ""
+            black[rank, col] = string(vec[1][1])
+            white[rank, col] = ""
+
+            if og_rank > b_king[2]
+                b_rrook[1] += 1
+            elseif og_rank < b_king[2]
+                b_lrook[1] += 1
+            end
+
+        elseif string(vec[1][1]) == "K"
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+
+            black[og_rank, og_col] = ""
+            black[rank, col] = string(vec[1][1])
+            white[rank, col] = ""
+            b_castle[1] += 1
+
+        else
+            og_rank = vec[2][1]
+            og_col = vec[2][2]
+            rank = vec[3][1]
+            col = vec[3][2]
+
+            black[og_rank, og_col] = ""
+            black[rank, col] = string(vec[1][1])
+            white[rank, col] = ""
+            
+        end
+
+    end
+
+    remove_white_enpassant()
+end
+
+
+"""
+white_random_move()
+
+Make a random move for white.
+"""
+function white_random_move()
+    if white_state() == 1
+        choices = white_legal()
+        l = length(choices)
+        ran = rand(1:l)
+        white_automove(choices[ran])
+    end
+end
+
+
+"""
+black_random_move()
+
+Make a random move for black.
+"""
+function black_random_move()
+    if black_state() == 1
+        choices = black_legal()
+        l = length(choices)
+        ran = rand(1:l)
+        black_automove(choices[ran])
+    end
+end
+
+
+
 
 
 

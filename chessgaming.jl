@@ -214,38 +214,87 @@ function black_live()
 end
 
 
-"""
-white_state()
 
-For white, check if stalemate, checkmate or normal position
+
 """
-function white_state()
-    if length(white_legal()) == 0
-        if white_check(w_king[1], w_king[2]) == 1
-            return -200
-        elseif white_check(w_king[1], w_king[2]) == 0
-            return 0
-        end
-    else
-        return 1
+run_auto_chess()
+
+Run a game of chess completely randomly
+"""
+function run_auto_chess(total_turns::Int)
+    
+    board_reset()
+
+    for i ∈ 1:total_turns
+    
+        draw_white_pgn()
+        display(whitepgn)
+
+        sleep(1)
+
+        white_random_move()
+
+        draw_white_pgn()
+        display(whitepgn)
+
+        sleep(1)
+
+        draw_black_pgn()
+        display(blackpgn)
+
+        sleep(1)
+
+        black_random_move()
+
+        draw_black_pgn()
+        display(blackpgn)
+
+        sleep(1)
+
     end
+
+
 end
 
 
-"""
-black_state()
 
-For black, check if stalemate, checkmate or normal position
+
 """
-function black_state()
-    if length(black_legal()) == 0
-        if black_check(b_king[1], b_king[2]) == 1
-            return -200
-        elseif black_check(b_king[1], b_king[2]) == 0
-            return 0
-        end
-    else
-        return 1
+run_auto_chess()
+
+Run a game of chess completely randomly
+"""
+function run_auto_chess960(total_turns::Int)
+
+    reset_960()
+
+    for i ∈ 1:total_turns
+    
+        draw_white_pgn()
+        display(whitepgn)
+
+        sleep(1)
+
+        white_random_move()
+
+        draw_white_pgn()
+        display(whitepgn)
+
+        sleep(1)
+
+        draw_black_pgn()
+        display(blackpgn)
+
+        sleep(1)
+
+        black_random_move()
+
+        draw_black_pgn()
+        display(blackpgn)
+
+        sleep(1)
+
     end
-end
 
+
+end
