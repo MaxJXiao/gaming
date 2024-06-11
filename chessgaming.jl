@@ -315,7 +315,7 @@ function save_auto_chess(total_games::Int, total_turns::Int)
 
         board_reset()
 
-
+        white_repeat_position(-1)
 
         for j ∈ 1:total_pics
         
@@ -324,9 +324,11 @@ function save_auto_chess(total_games::Int, total_turns::Int)
                     m = white_random_move()
                     draw_white_pgn()
 
+                    r = white_repeat_position(j)
+
                     save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$j.png"), whitepgn)
         
-                    if m == 0
+                    if m == 0 || r == 2
                         pic1, pic2, pic3 = j, j + 1, j + 2
                         save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
                         save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic2.png"), whitepgn)
@@ -345,9 +347,11 @@ function save_auto_chess(total_games::Int, total_turns::Int)
                     m = black_random_move()
                     draw_white_pgn()
 
+                    r = black_repeat_position(j)
+
                     save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$j.png"), whitepgn)
         
-                    if m == 0
+                    if m == 0 || r == 2
                         pic1, pic2, pic3 = j, j + 1, j + 2
                         save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
                         save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic2.png"), whitepgn)

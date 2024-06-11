@@ -4,6 +4,11 @@ numbers = ["1" "2" "3" "4" "5" "6" "7" "8"]
 fiddy_rule = [0]
 material = [30]
 
+white_repeat = box_maker(10)
+black_repeat = box_maker(10)
+w_repeat = Int.(zeros(1,10))
+b_repeat = Int.(zeros(1,10))
+
 
 
 r_white = ["" "" "" "" "" "" "" "";
@@ -121,6 +126,11 @@ function board_reset()
     b_lrook[1] *= 0
     w_rrook[1] *= 0
     b_rrook[1] *= 0
+
+    white_repeat .= box_maker(10)
+    black_repeat .= box_maker(10)
+    w_repeat .= Int.(zeros(1,10))
+    b_repeat .= Int.(zeros(1,10))
 end
 
 
@@ -3647,6 +3657,94 @@ function sufficient_material()
     end
     
 end
+
+
+"""
+box_maker()
+
+Save a couple of matrices to store past positions to see if there are any repeats.
+"""
+function box_maker(num::Int)
+    vec = []
+    for i ∈ 1:num
+        append!(vec, [
+            ["" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "" ""]
+        ])
+    end
+
+    return vec
+    
+end
+
+
+"""
+white_repeat_position()
+
+Check how many times white has repeated the position.
+"""
+function white_repeat_position(move::Int)
+    repeats = 0
+
+    b = copy(board())
+    count = Int((move + 1) / 2) ### white's turns come in 1, 3, 5, 7, 9, ...
+    l = length(white_repeat)
+    for i ∈ 1:l
+        if b == white_repeat[i]
+            w_repeat[i] += 1
+        end
+    end
+
+    for i ∈ 1:l 
+        if w_repeat[i] == 2
+            repeats += 2
+        end
+    end
+
+    white_repeat[count % l + 1] = b
+    w_repeat[count % l + 1] *= 0
+
+    return repeats
+
+end
+
+
+"""
+black_repeat_position()
+
+Check how many times black has repeated the position.
+"""
+function black_repeat_position(move::Int)
+    repeats = 0
+
+    b = copy(board())
+    count = Int(move / 2) ### white's turns come in 2, 4, 6, 8, 10, ...
+    l = length(black_repeat)
+    for i ∈ 1:l
+        if b == black_repeat[i]
+            b_repeat[i] += 1
+        end
+    end
+
+    for i ∈ 1:l 
+        if b_repeat[i] == 2
+            repeats += 2
+        end
+    end
+
+    black_repeat[count % l + 1] = b
+    b_repeat[count % l + 1] *= 0
+
+    return repeats
+
+end
+
 
 
 
