@@ -321,7 +321,18 @@ function save_auto_chess(total_games::Int, total_turns::Int)
         
             if j % 2 == 1
                 if white_state() == 1
-                    white_random_move()
+                    m = white_random_move()
+                    draw_white_pgn()
+
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$j.png"), whitepgn)
+        
+                    if m == 0
+                        pic1, pic2, pic3 = j, j + 1, j + 2
+                        save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
+                        save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic2.png"), whitepgn)
+                        save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic3.png"), whitepgn)
+                        break
+                    end
                 else
                     pic1, pic2, pic3 = j, j + 1, j + 2
                     save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
@@ -331,7 +342,18 @@ function save_auto_chess(total_games::Int, total_turns::Int)
                 end
             elseif j % 2 == 0
                 if black_state() == 1
-                    black_random_move()
+                    m = black_random_move()
+                    draw_white_pgn()
+
+                    save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$j.png"), whitepgn)
+        
+                    if m == 0
+                        pic1, pic2, pic3 = j, j + 1, j + 2
+                        save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
+                        save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic2.png"), whitepgn)
+                        save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic3.png"), whitepgn)
+                        break
+                    end
                 else
                     pic1, pic2, pic3 = j, j + 1, j + 2
                     save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$pic1.png"), whitepgn)
@@ -340,10 +362,6 @@ function save_auto_chess(total_games::Int, total_turns::Int)
                     break
                 end
             end
-
-            draw_white_pgn()
-
-            save(joinpath(@__DIR__, "images", "chess", "auto", "$i", "$j.png"), whitepgn)
 
 
         end

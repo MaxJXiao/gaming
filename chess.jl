@@ -1,6 +1,10 @@
 files = ["a" "b" "c" "d" "e" "f" "g" "h"]
 numbers = ["1" "2" "3" "4" "5" "6" "7" "8"]
 
+fiddy_rule = [0]
+material = [30]
+
+
 
 r_white = ["" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
@@ -3260,6 +3264,8 @@ function white_state()
         elseif white_check(w_king[1], w_king[2]) == 0
             return 0
         end
+    elseif fiddy_rule[1] > 99 # 100 move rule as 50 moves each
+        return 0
     else
         return 1
     end
@@ -3278,6 +3284,8 @@ function black_state()
         elseif black_check(b_king[1], b_king[2]) == 0
             return 0
         end
+    elseif fiddy_rule[1] > 99
+        return 0
     else
         return 1
     end
@@ -3494,6 +3502,12 @@ function white_random_move()
     ran = rand(1:l)
     white_automove(choices[ran])
 
+    mat = mat_count()
+    m = sufficient_material(mat)
+    fifty_move_rule(choices[ran], mat)
+
+    return m
+
 end
 
 
@@ -3509,10 +3523,130 @@ function black_random_move()
     ran = rand(1:l)
     black_automove(choices[ran])
 
+    mat = mat_count()
+    m = sufficient_material(mat)
+    fifty_move_rule(choices[ran], mat)
+
+    return m
+
 end
 
 
+"""
+mat_count()
 
+Figure out if there is enough material for a checkmate.
+"""
+function mat_count()
+
+    piece_white = [0, 0, 0, 0, 0] # [p, R, N, B, Q]
+    for i ∈ eachindex(white)
+        if white[i] == "p" || white[i] == "pe"
+            piece_white[1] += 1
+        elseif white[i] == "R"
+            piece_white[2] += 1
+        elseif white[i] == "N"
+            piece_white[3] += 1
+        elseif white[i] == "B"
+            piece_white[4] += 1
+        elseif white[i] == "Q"
+            piece_white[5] += 1
+        end
+    end
+
+    piece_black = [0, 0, 0, 0, 0] # [p, R, N, B, Q]
+    for i ∈ eachindex(black)
+        if black[i] == "p" || black[i] == "pe"
+            piece_black[1] += 1
+        elseif black[i] == "R"
+            piece_black[2] += 1
+        elseif black[i] == "N"
+            piece_black[3] += 1
+        elseif black[i] == "B"
+            piece_black[4] += 1
+        elseif black[i] == "Q"
+            piece_black[5] += 1
+        end
+    end
+
+    return [piece_white, piece_black]
+
+end
+
+
+"""
+fifty_move_rule()
+
+If a pawn move, a capture, or castles is made, reset the count.
+"""
+function fifty_move_rule(vec::AbstractVector, mat::AbstractVector)
+    if string(vec[1][1]) == "p" || string(vec[1][1]) == "px" ||
+        string(vec[1][1]) == "O-O" || string(vec[1][1]) == "O-O-O"
+            fiddy_rule[1] *= 0
+    elseif sum(sum(mat)) != material[1]
+        fiddy_rule[1] *= 0
+        material[1] == sum(sum(mat))
+    else
+        fiddy_rule[1] += 1
+    end
+
+end
+function fifty_move_rule(vec::AbstractVector)
+
+    mat = mat_count()
+    if string(vec[1][1]) == "p" || string(vec[1][1]) == "px" ||
+        string(vec[1][1]) == "O-O" || string(vec[1][1]) == "O-O-O"
+            fiddy_rule[1] *= 0
+    elseif sum(sum(mat)) != material[1]
+        fiddy_rule[1] *= 0
+        material[1] == sum(sum(mat))
+    else
+        fiddy_rule[1] += 1
+    end
+
+end
+
+"""
+sufficient_material()
+
+Check whether or not there is sufficient mating material.
+"""
+function sufficient_material(mat::AbstractVector)
+
+    if mat[1][1] != 0 || mat[2][1] != 0 || mat[1][2] != 0 || mat[2][2] != 0 ||
+        mat[1][5] != 0 || mat[2][5] != 0
+            return 1
+    elseif mat[1][3] > 1 || mat[2][3] > 1 ||
+        mat[1][4] > 1 || mat[2][4] > 1
+            return 1
+    elseif mat[1][3] == 1 && mat[1][4] == 1
+        return 1
+    elseif mat[2][3] == 1 && mat[2][4] == 1
+        return 1
+    else
+        return 0
+    end
+    
+end
+function sufficient_material()
+
+    mat = mat_count()
+
+    if mat[1][1] != 0 || mat[2][1] != 0 || mat[1][2] != 0 || mat[2][2] != 0 ||
+        mat[1][5] != 0 || mat[2][5] != 0
+            return 1
+    elseif mat[1][3] > 1 || mat[2][3] > 1 ||
+        mat[1][4] > 1 || mat[2][4] > 1
+            return 1
+    elseif mat[1][3] == 1 && mat[1][4] == 1
+        return 1
+    elseif mat[2][3] == 1 && mat[2][4] == 1
+        return 1
+    else
+        return 0
+    end
+    
+end
 
 
 
@@ -3524,7 +3658,7 @@ white = ["" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
     "" "" "" "" "" "" "" "";
-    "" "" "" "" "" "" "" "";
+    "" "" "" "" "" "" "B" "";
     "" "" "" "" "" "" "" "";
     "" "" "" "" "" "K" "" ""
 ]
@@ -3536,7 +3670,7 @@ black = ["" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" "";
 "" "" "" "" "" "K" "" "";
-"" "" "" "" "" "p" "" "";
+"" "" "" "" "" "" "" "";
 "" "" "" "" "" "" "" ""
 ]
 
