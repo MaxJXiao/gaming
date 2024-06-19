@@ -855,6 +855,8 @@ starting_r = [0.1 0.1 0.1;
 
         FileIO.save(joinpath(@__DIR__,"tictacwinners$i.jld2"), "winners$i", winners)
 
+        println(i)
+
     end
 
 end
