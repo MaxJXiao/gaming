@@ -822,3 +822,14 @@ dinners = FileIO.load(joinpath(@__DIR__,"winners.jld2"), "winners")
 last_winner = last(dinners)
 
 runrandtic(100, last_winner)
+
+
+q_last = [last_winner[1] last_winner[2] last_winner[3];
+    last_winner[4] last_winner[5] last_winner[6];
+    last_winner[7] last_winner[8] last_winner[9]
+]
+
+q_r = [last_winner[10] last_winner[11] last_winner[12];
+    last_winner[13] last_winner[14] last_winner[15];
+    last_winner[16] last_winner[17] last_winner[18]
+]
