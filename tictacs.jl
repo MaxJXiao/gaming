@@ -506,7 +506,7 @@ function runrandtic(runs, q)
 
 
                 if i % 2 == 1
-                    xuanze = decision(board, q, i, 0.9)
+                    xuanze = decision(board, q, i, 1)
                     board[xuanze[1]] = 1
                 elseif i % 2 == 0
                     rand_xuan(board, i)
@@ -549,7 +549,7 @@ function runrandtic(runs, q)
                 if i % 2 == 1
                     rand_xuan(board, i)
                 elseif i % 2 == 0
-                    xuanze = decision(board, q, i, 0.9)
+                    xuanze = decision(board, q, i, 1)
                     board[xuanze[1]] = -1
                 end
 
@@ -833,3 +833,28 @@ q_r = [last_winner[10] last_winner[11] last_winner[12];
     last_winner[13] last_winner[14] last_winner[15];
     last_winner[16] last_winner[17] last_winner[18]
 ]
+
+starting_q = [100 100 100;
+100 100 100;
+100 100 100
+]
+
+starting_r = [0.1 0.1 0.1;
+0.1 0.1 0.1;
+0.1 0.1 0.1
+]
+
+
+
+
+@time begin
+
+    for i ∈ 1:10
+
+        winners, scores = pokemon_generations(100, 10, 20)
+
+        FileIO.save(joinpath(@__DIR__,"tictacwinners$i.jld2"), "winners$i", winners)
+
+    end
+
+end
