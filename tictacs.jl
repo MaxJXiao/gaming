@@ -833,9 +833,9 @@ end
 
 
 
-FileIO.save(joinpath(@__DIR__,"tictacwinners.jld2"), "winners", winners)
+FileIO.save(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winners", winners)
 
-dinners = FileIO.load(joinpath(@__DIR__,"tictacwinners.jld2"), "winners")
+dinners = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winners")
 
 
 last_winner = last(dinners)
@@ -872,7 +872,7 @@ starting_r = [0.1 0.1 0.1;
 
         winners, scores = pokemon_generations(100, 10, 20)
 
-        FileIO.save(joinpath(@__DIR__,"tictacwinners$i.jld2"), "winners$i", winners)
+        FileIO.save(joinpath(@__DIR__, "ticcopy", "tictacwinners$i.jld2"), "winners$i", winners)
 
         println(i)
 
@@ -890,7 +890,7 @@ w = []
 
 for i ∈ 1:10
     
-    din = FileIO.load(joinpath(@__DIR__,"tictacwinners$i.jld2"), "winners$i")
+    din = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwinners$i.jld2"), "winners$i")
 
     last_win = last(din)
 
