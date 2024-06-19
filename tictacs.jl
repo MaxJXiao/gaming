@@ -1,3 +1,7 @@
+using BenchmarkTools
+using FileIO
+using JLD2
+
 board = [0 0 0 0 0 0 0 0 0]
 
 q = [100 100 100 100 100 100 100 100 100 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]
@@ -7,7 +11,6 @@ q = [100 100 100 100 100 100 100 100 100 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]
 
 test_board = [1 0 0 -1 0 0 1 0 0]
 
-logistic(x) = 1/(1 + exp(-x))
 
 function normalise(v)
     l = length(v)
@@ -60,6 +63,29 @@ function board_state(board)
     end
 
 end
+
+
+function q_vecgen(num)
+    q_vecs = []
+    for i ∈ 1:num
+        q_vec = [100 100 100 100 100 100 100 100 100 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]
+
+        q_state(q_vec, α, β)
+        append!(q_vecs, [q_vec])
+    end
+    return q_vecs
+end
+function q_vecgen(vec, num)
+    q_vecs = [vec]
+    for i ∈ 1:(num-1)
+        q_vec = vec
+
+        q_state(q_vec, α, β)
+        append!(q_vecs, [q_vec])
+    end
+    return q_vecs
+end
+
 
 
 function q_state(q_state, α, β)
@@ -488,14 +514,14 @@ function runrandtic(runs, q)
 
                 if board_state(board) == 1
                     if i % 2 == 1
-                        println("$i win")
+                        println("q win")
                         wins[1] += 1
 
                         copying = copy(board)
                         append!(boards, [copying])
                         break
                     elseif i % 2 == 0
-                        println("$i win")
+                        println("rand win")
                         wins[2] += 1
                         copying = copy(board)
                         append!(boards, [copying])
@@ -529,13 +555,13 @@ function runrandtic(runs, q)
 
                 if board_state(board) == 1
                     if i % 2 == 1
-                        println("$i win")
+                        println("rand win")
                         wins[2] += 1
                         copying = copy(board)
                         append!(boards, [copying])
                         break
                     elseif i % 2 == 0
-                        println("$i win")
+                        println("q win")
                         wins[1] += 1
                         copying = copy(board)
                         append!(boards, [copying])
@@ -562,3 +588,237 @@ function runrandtic(runs, q)
     return wins, boards
 
 end
+
+
+
+function runstream(runs, q₁, q₂)
+
+    wins = [0.0 0.0]
+    #boards = []
+
+    for j ∈ 1:runs
+
+        r_board()
+
+
+        if j % 2 == 1
+
+            for i ∈ 1:9
+
+
+                if i % 2 == 1
+                    xuanze = decision(board, q₁, i, 0.9)
+                    board[xuanze[1]] = 1
+                elseif i % 2 == 0
+                    xuanze = decision(board, q₂, i, 0.9)
+                    board[xuanze[1]] = -1
+                end
+
+                if board_state(board) == 1
+                    if i % 2 == 1
+                        #println("$i win")
+                        wins[1] += 1
+
+                        #copying = copy(board)
+                        #append!(boards, [copying])
+                        break
+                    elseif i % 2 == 0
+                        #println("$i win")
+                        wins[2] += 1
+                        #copying = copy(board)
+                        #append!(boards, [copying])
+                        break
+                    end
+                elseif board_state(board) == 0
+
+                    #println("draw")
+                    wins[1] += 0.5
+                    wins[2] += 0.5
+                    #copying = copy(board)
+                    #append!(boards, [copying])
+                    break
+
+                end
+
+            end
+
+
+        elseif j % 2 == 0
+
+            for i ∈ 1:9
+
+
+                if i % 2 == 1
+                    xuanze = decision(board, q₂, i, 0.9)
+                    board[xuanze[1]] = 1
+                elseif i % 2 == 0
+                    xuanze = decision(board, q₁, i, 0.9)
+                    board[xuanze[1]] = -1
+                end
+
+                if board_state(board) == 1
+                    if i % 2 == 1
+                        #println("$i win")
+                        wins[2] += 1
+                        #copying = copy(board)
+                        #append!(boards, [copying])
+                        break
+                    elseif i % 2 == 0
+                        #println("$i win")
+                        wins[1] += 1
+                        #copying = copy(board)
+                        #append!(boards, [copying])
+                        break
+                    end
+                elseif board_state(board) == 0
+
+                    #println("draw")
+                    wins[1] += 0.5
+                    wins[2] += 0.5
+                    #copying = copy(board)
+                    #append!(boards, [copying])
+                    break
+
+                end
+
+            end
+
+        end
+
+
+    end
+
+    return wins
+
+end
+
+
+function running_qs(block, battles)
+    l = length(block)
+    win_share = zeros(l, l)
+
+    for i ∈ 1:l 
+        for j ∈ 1:l 
+            if i != j && win_share[i,j] == 0
+                i_share, j_share = runstream(battles, block[i], block[j])
+                win_share[i, j] = i_share
+                win_share[j, i] = j_share
+            end
+        end
+
+    end
+
+    totals = []
+
+    for i ∈ 1:l 
+        append!(totals, sum(win_share[i,:]))
+    end
+
+    return win_share, totals
+
+end
+
+"""
+
+winners = []
+
+first_generation = q_vecgen(100);
+
+@time begin
+
+results₁ = running_qs(first_generation, 10);
+
+end
+
+r₁ = findmax(results₁[2])
+
+first_gen_winner = first_generation[r₁[2]]
+
+append!(winners, [first_gen_winner])
+
+
+
+second_generation = q_vecgen(first_gen_winner, 100)
+
+@time begin
+
+results₂ = running_qs(second_generation,10)
+
+end
+
+r₂ = findmax(results₂)
+
+second_gen_winner = second_generation[r₂[2]]
+
+append!(winners, [second_gen_winner])
+
+
+"""
+
+
+function pokemon_generations(gens, num_vec, battles)
+
+    winners = []
+
+    scores = []
+
+    first_gen = q_vecgen(num_vec)
+
+    results = running_qs(first_gen, battles)
+
+    r = findmax(results[2])
+
+    first_winner = first_gen[r[2]]
+
+    append!(winners, [first_winner])
+
+    append!(scores, [results[2]])
+    
+
+    for i ∈ 1:(gens-1)
+
+        gen = q_vecgen(last(winners), num_vec)
+
+        g_results = running_qs(gen, battles)
+
+        g_r = findmax(g_results[2])
+
+        s_winner = gen[g_r[2]]
+
+        append!(winners, [s_winner])
+
+        append!(scores, [g_results[2]])
+
+    end
+
+
+    return winners, scores
+
+    
+end
+
+
+@time begin
+
+winners, scores = pokemon_generations(100, 10, 20)
+
+end
+
+# gens is multipicative, num_vec is squared, battles is multiplicative
+
+# (4, 10, 20) should be around 2.5s ≈ 2.6s
+
+# (100, 10, 20) should be around 2.5 * 25s ≈ 66s
+
+
+
+
+
+FileIO.save(joinpath(@__DIR__,"winners.jld2"), "winners", winners)
+
+dinners = FileIO.load(joinpath(@__DIR__,"winners.jld2"), "winners")
+
+
+last_winner = last(dinners)
+
+runrandtic(100, last_winner)
