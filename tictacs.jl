@@ -814,9 +814,9 @@ end
 
 
 
-FileIO.save(joinpath(@__DIR__,"winners.jld2"), "winners", winners)
+FileIO.save(joinpath(@__DIR__,"tictacwinners.jld2"), "winners", winners)
 
-dinners = FileIO.load(joinpath(@__DIR__,"winners.jld2"), "winners")
+dinners = FileIO.load(joinpath(@__DIR__,"tictacwinners.jld2"), "winners")
 
 
 last_winner = last(dinners)
