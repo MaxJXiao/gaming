@@ -97,6 +97,25 @@ function q_state(q_state, α, β)
     end
 end
 
+function display_q(q_state)
+    mat = [q_state[1] q_state[2] q_state[3];
+    q_state[4] q_state[5] q_state[6];
+    q_state[7] q_state[8] q_state[9]
+    ]
+    return mat
+end
+
+function display_r(q_state)
+    mat = [q_state[10] q_state[11] q_state[12];
+        q_state[13] q_state[14] q_state[15];
+        q_state[16] q_state[17] q_state[18]
+    ]
+    return mat
+end
+
+
+
+
 function evaluation(board, q_state, turn)
     eval_pos = 0
     eval_neg = 0
@@ -514,14 +533,14 @@ function runrandtic(runs, q)
 
                 if board_state(board) == 1
                     if i % 2 == 1
-                        println("q win")
+                        #println("q win")
                         wins[1] += 1
 
                         copying = copy(board)
                         append!(boards, [copying])
                         break
                     elseif i % 2 == 0
-                        println("rand win")
+                        #println("rand win")
                         wins[2] += 1
                         copying = copy(board)
                         append!(boards, [copying])
@@ -529,7 +548,7 @@ function runrandtic(runs, q)
                     end
                 elseif board_state(board) == 0
 
-                    println("draw")
+                    #println("draw")
                     wins[1] += 0.5
                     wins[2] += 0.5
                     copying = copy(board)
@@ -555,13 +574,13 @@ function runrandtic(runs, q)
 
                 if board_state(board) == 1
                     if i % 2 == 1
-                        println("rand win")
+                        #println("rand win")
                         wins[2] += 1
                         copying = copy(board)
                         append!(boards, [copying])
                         break
                     elseif i % 2 == 0
-                        println("q win")
+                        #println("q win")
                         wins[1] += 1
                         copying = copy(board)
                         append!(boards, [copying])
@@ -569,7 +588,7 @@ function runrandtic(runs, q)
                     end
                 elseif board_state(board) == 0
 
-                    println("draw")
+                    #println("draw")
                     wins[1] += 0.5
                     wins[2] += 0.5
                     copying = copy(board)
@@ -858,5 +877,43 @@ starting_r = [0.1 0.1 0.1;
         println(i)
 
     end
+
+end
+
+
+
+q = []
+
+r = []
+
+w = []
+
+for i ∈ 1:10
+    
+    din = FileIO.load(joinpath(@__DIR__,"tictacwinners$i.jld2"), "winners$i")
+
+    last_win = last(din)
+
+    wins, boards = runrandtic(100,last_win)
+
+    append!(w, [wins])
+
+    append!(q, [display_q(last_win)])
+
+    append!(r, [display_r(last_win)])
+
+end
+
+
+for i ∈ 1:10
+
+    display(w[i])
+    println()
+    display(q[i])
+    println()
+    display(r[i])
+
+    println()
+    println()
 
 end
