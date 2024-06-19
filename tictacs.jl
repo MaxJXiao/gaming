@@ -5,8 +5,8 @@ using JLD2
 board = [0 0 0 0 0 0 0 0 0]
 
 q = [100 100 100 100 100 100 100 100 100 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]
-α = 1
-β = 0.01
+α = 0.1
+β = 0.001
 
 
 test_board = [1 0 0 -1 0 0 1 0 0]
@@ -512,7 +512,7 @@ end
 function runrandtic(runs, q)
 
     wins = [0.0 0.0]
-    boards = []
+    #boards = []
 
     for j ∈ 1:runs
 
@@ -536,14 +536,14 @@ function runrandtic(runs, q)
                         #println("q win")
                         wins[1] += 1
 
-                        copying = copy(board)
-                        append!(boards, [copying])
+                        #copying = copy(board)
+                        #append!(boards, [copying])
                         break
                     elseif i % 2 == 0
-                        #println("rand win")
+                        println("rand win")
                         wins[2] += 1
-                        copying = copy(board)
-                        append!(boards, [copying])
+                        #copying = copy(board)
+                        #append!(boards, [copying])
                         break
                     end
                 elseif board_state(board) == 0
@@ -551,8 +551,8 @@ function runrandtic(runs, q)
                     #println("draw")
                     wins[1] += 0.5
                     wins[2] += 0.5
-                    copying = copy(board)
-                    append!(boards, [copying])
+                    #copying = copy(board)
+                    #append!(boards, [copying])
                     break
 
                 end
@@ -574,16 +574,16 @@ function runrandtic(runs, q)
 
                 if board_state(board) == 1
                     if i % 2 == 1
-                        #println("rand win")
+                        println("rand win")
                         wins[2] += 1
-                        copying = copy(board)
-                        append!(boards, [copying])
+                        #copying = copy(board)
+                        #append!(boards, [copying])
                         break
                     elseif i % 2 == 0
                         #println("q win")
                         wins[1] += 1
-                        copying = copy(board)
-                        append!(boards, [copying])
+                        #copying = copy(board)
+                        #append!(boards, [copying])
                         break
                     end
                 elseif board_state(board) == 0
@@ -591,8 +591,8 @@ function runrandtic(runs, q)
                     #println("draw")
                     wins[1] += 0.5
                     wins[2] += 0.5
-                    copying = copy(board)
-                    append!(boards, [copying])
+                    #copying = copy(board)
+                    #append!(boards, [copying])
                     break
 
                 end
@@ -604,7 +604,7 @@ function runrandtic(runs, q)
 
     end
 
-    return wins, boards
+    return wins#, boards
 
 end
 
@@ -819,7 +819,7 @@ end
 
 @time begin
 
-winners, scores = pokemon_generations(100, 10, 20)
+winners, scores = pokemon_generations(1000, 10, 20)
 
 end
 
@@ -840,7 +840,7 @@ dinners = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winn
 
 last_winner = last(dinners)
 
-runrandtic(100, last_winner)
+runrandtic(1000, last_winner)
 
 
 q_last = [last_winner[1] last_winner[2] last_winner[3];
@@ -917,3 +917,45 @@ for i ∈ 1:10
     println()
 
 end
+
+
+din₃ = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwinners3.jld2"), "winners3")
+
+winning = last(din₃)
+
+
+## I am playing as player 1 against player 2 which is the AI
+
+r_board()
+
+board[5] = 1
+
+decision(board, winning, 2, 1)
+
+board[9] = -1
+
+board[3] = 1
+
+decision(board, winning, 4, 1)
+
+board[7] = -1
+
+board[8] = 1
+
+decision(board, winning, 6, 1)
+
+board[2] = -1
+
+board[4] = 1
+
+decision(board, winning, 8, 1)
+
+board[6] = -1
+
+board[1] = 1
+
+board_state(board)
+
+## draw
+
+runrandtic(1000, winning)
