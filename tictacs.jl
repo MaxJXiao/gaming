@@ -1,12 +1,13 @@
 using BenchmarkTools
 using FileIO
 using JLD2
+using Plots
 
 board = [0 0 0 0 0 0 0 0 0]
 
 q = [100 100 100 100 100 100 100 100 100 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]
-α = 0.1
-β = 0.001
+α = 1
+β = 0.01
 
 
 test_board = [1 0 0 -1 0 0 1 0 0]
@@ -540,7 +541,7 @@ function runrandtic(runs, q)
                         #append!(boards, [copying])
                         break
                     elseif i % 2 == 0
-                        println("rand win")
+                        #println("rand win")
                         wins[2] += 1
                         #copying = copy(board)
                         #append!(boards, [copying])
@@ -574,7 +575,7 @@ function runrandtic(runs, q)
 
                 if board_state(board) == 1
                     if i % 2 == 1
-                        println("rand win")
+                        #println("rand win")
                         wins[2] += 1
                         #copying = copy(board)
                         #append!(boards, [copying])
@@ -837,10 +838,46 @@ FileIO.save(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winners", winn
 
 dinners = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winners")
 
+🦕 = length(dinners)
 
-last_winner = last(dinners)
+@time begin
 
-runrandtic(1000, last_winner)
+    win_share = []
+
+    for i ∈ 1:🦕
+        wins = runrandtic(1000,dinners[i])
+        append!(win_share, [wins])
+        println(i)
+    end
+
+end
+
+
+#FileIO.save(joinpath(@__DIR__, "ticcopy", "tictacwin_share.jld2"), "win_share", win_share)
+
+win_shar = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwin_share.jld2"), "win_share")
+
+win_s = []
+
+for i ∈ 1:🦕
+    append!(win_s, win_shar[i][1])
+end
+
+scatter(1:1000, win_s,
+    title = "Wins out of 1000",
+    ylims = (800, 1000),
+    legend = false,
+    xlabel = "Generation",
+    ylabel = "Wins"
+)
+
+
+
+
+
+
+
+
 
 
 q_last = [last_winner[1] last_winner[2] last_winner[3];
