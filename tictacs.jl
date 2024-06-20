@@ -6,7 +6,7 @@ using Plots
 board = [0 0 0 0 0 0 0 0 0]
 
 q = [100 100 100 100 100 100 100 100 100 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]
-α = 1
+α = 0.1
 β = 0.01
 
 
@@ -69,7 +69,7 @@ end
 function q_vecgen(num)
     q_vecs = []
     for i ∈ 1:num
-        q_vec = [100 100 100 100 100 100 100 100 100 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]
+        q_vec = [100 100 100 100 100 100 100 100 100 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0]
 
         q_state(q_vec, α, β)
         append!(q_vecs, [q_vec])
@@ -627,10 +627,10 @@ function runstream(runs, q₁, q₂)
 
 
                 if i % 2 == 1
-                    xuanze = decision(board, q₁, i, 0.9)
+                    xuanze = decision(board, q₁, i, 1)
                     board[xuanze[1]] = 1
                 elseif i % 2 == 0
-                    xuanze = decision(board, q₂, i, 0.9)
+                    xuanze = decision(board, q₂, i, 1)
                     board[xuanze[1]] = -1
                 end
 
@@ -793,11 +793,13 @@ function pokemon_generations(gens, num_vec, battles)
     append!(winners, [first_winner])
 
     append!(scores, [results[2]])
+
+    new = first_winner
     
 
     for i ∈ 1:(gens-1)
 
-        gen = q_vecgen(last(winners), num_vec)
+        gen = q_vecgen(new, num_vec)
 
         g_results = running_qs(gen, battles)
 
@@ -808,6 +810,8 @@ function pokemon_generations(gens, num_vec, battles)
         append!(winners, [s_winner])
 
         append!(scores, [g_results[2]])
+
+        new = copy.(s_winner)
 
     end
 
@@ -820,7 +824,7 @@ end
 
 @time begin
 
-winners, scores = pokemon_generations(1000, 10, 20)
+winners, scores = pokemon_generations(100, 10, 20)
 
 end
 
@@ -832,13 +836,21 @@ end
 
 
 
-
+#q_test = q_vecgen(2)
 
 FileIO.save(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winners", winners)
 
 dinners = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winners")
 
 🦕 = length(dinners)
+
+
+runtictac(1000, first(dinners), last(dinners))
+
+
+
+
+
 
 @time begin
 
@@ -853,7 +865,8 @@ dinners = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwinners.jld2"), "winn
 end
 
 
-#FileIO.save(joinpath(@__DIR__, "ticcopy", "tictacwin_share.jld2"), "win_share", win_share)
+
+FileIO.save(joinpath(@__DIR__, "ticcopy", "tictacwin_share.jld2"), "win_share", win_share)
 
 win_shar = FileIO.load(joinpath(@__DIR__, "ticcopy", "tictacwin_share.jld2"), "win_share")
 
@@ -863,9 +876,9 @@ for i ∈ 1:🦕
     append!(win_s, win_shar[i][1])
 end
 
-scatter(1:1000, win_s,
+scatter(1: 🦕, win_s,
     title = "Wins out of 1000",
-    ylims = (800, 1000),
+    #ylims = (935, 960),
     legend = false,
     xlabel = "Generation",
     ylabel = "Wins"
