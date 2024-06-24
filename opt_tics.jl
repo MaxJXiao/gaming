@@ -204,6 +204,201 @@ function current_eval(board)
 end
 
 
+function q_state(q_state, α)
+    for i ∈ 1:9
+        q_state[i] += α*randn()
+    end
+end
+
+function q_vecgen(num, α)
+    q_vecs = []
+    for i ∈ 1:num
+        q_vec = [10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0]
+
+        q_state(q_vec, α)
+        append!(q_vecs, [q_vec])
+    end
+    return q_vecs
+end
+function q_vecgen(arr, num, α)
+    l = length(arr)
+    q_vecs = []
+    for i ∈ 1:l 
+        append!(q_vecs, [arr[i]])
+    end
+    for i ∈ 1:(num-l)
+        
+        q_vec = random_effect(arr)
+
+        q_state(q_vec, α)
+        append!(q_vecs, [q_vec])
+
+    end
+    return q_vecs
+end
+
+
+function random_effect(arr)
+    x = 10
+    l = length(arr)
+    result = [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0]
+    if x == 1
+        for i ∈ 1:l 
+            result .+= arr[i]./l
+        end
+
+    elseif x == 2
+        y = rand(1:l)
+        z = rand(1:l)
+        ran = rand(1:9)
+        san = rand(1:9)
+        dan = rand(1:9)
+        result .= (arr[y] .+ arr[z]) ./ 2
+        result[ran] += randn()
+        result[san] += randn()
+        result[dan] += randn()
+
+    elseif x == 3
+        result .= (arr[1 % l + 1] .+ arr[3 % l + 1] .+ arr[5 % l + 1] + arr[7 % l + 1])./4
+
+    elseif x == 4
+        result .= (arr[2 % l + 1] .+ arr[4 % l + 1] .+ arr[6 % l + 1] + arr[8 % l + 1])./4
+
+    elseif x == 5
+        result .= (arr[1 % l + 1] .+ arr[l - 1] .+ arr[4 % l + 1] + arr[6 % l + 1])./4
+    
+    elseif x == 6
+        result .= (arr[1] .+ arr[4 % l + 1]) ./ 2
+        ran = rand(1:9)
+        result[ran] += 2*randn()
+
+    elseif x == 7
+        result .= arr[1] .+ randn()
+
+    elseif x == 8
+        result .= (arr[2] .+ arr[3 % l + 1]) ./2
+        result[5] += randn()
+
+    elseif x == 9
+        for i ∈ 1:9
+            result[i] = arr[i % l + 1][i]
+        end
+    
+    elseif x == 10
+        result .= arr[1]
+
+    end
+
+
+
+    return result
+end
+
+
+function display_q(q_state)
+    mat = [q_state[1] q_state[2] q_state[3];
+    q_state[4] q_state[5] q_state[6];
+    q_state[7] q_state[8] q_state[9]
+    ]
+    return mat
+end
+
+#test = q_vecgen(10,1)
+#random_effect(test)
+# combining
+
+# [q_vecgen(10, 1) ; q_vecgen(test, 90, 1)] makes 100 vectors
+
+function decider(board)
+
+    seq = seq_gen(board)
+
+    no_r = no_repeats(seq)
+    new_seq = []
+
+    if seq == 0
+        for i ∈ no_r
+            append!(new_seq, parse(Int, string(i) ) )
+        end
+    else
+        for i ∈ no_r
+            append!(new_seq, parse(Int, string(seq)*string(i) ) )
+        end
+    end
+
+    l = length(split(string(new_seq[1]), ""), )
+    r = length(no_r)
+
+    eval = []
+
+
+    println(l)
+
+    for i ∈ 1:r 
+        if l == 1
+            append!(eval, 0)
+        elseif l == 2
+            ind = findall(x -> (x == new_seq[i]), eval₂[:, 1])
+            append!(eval, eval₂[ind, 2])
+        elseif l == 3
+            ind = findall(x -> (x == new_seq[i]), eval₃[:, 1])
+            append!(eval, eval₃[ind, 2])
+        elseif l == 4
+            ind = findall(x -> (x == new_seq[i]), eval₄[:, 1])
+            append!(eval, eval₄[ind, 2])
+        elseif l == 5
+            ind = findall(x -> (x == new_seq[i]), eval₅[:, 1])
+            append!(eval, eval₅[ind, 2])
+        elseif l == 6
+            ind = findall(x -> (x == new_seq[i]), eval₆[:, 1])
+            append!(eval, eval₆[ind, 2])
+        elseif l == 7
+            ind = findall(x -> (x == new_seq[i]), eval₇[:, 1])
+            return append!(eval, eval₇[ind, 2])
+        elseif l == 8
+            ind = findall(x -> (x == new_seq[i]), eval₈[:, 1])
+            append!(eval, eval₈[ind, 2])
+        elseif l == 9
+            ind = findall(x -> (x == new_seq[i]), eval₉[:, 1])
+            append!(eval, eval₉[ind, 2])
+        end
+    end
+
+    return new_seq, eval
+
+end
+
+
+function prob_dist(vec)
+    total = sum(vec)
+    norm_vec = vec./total
+
+    area = [0.0]
+
+    l = length(vec)
+
+    for i ∈ 1:l 
+        append!(area, sum(norm_vec[1:i]))
+    end
+
+    return area
+    
+end
+
+function prob_choice(vec)
+    l = length(vec)
+    x = rand()
+    for i ∈ 1:(l-1)
+        if x > vec[i] && x < vec[i + 1]
+            return i
+        end
+    end
+end
+
+
+
+
+
 
 
 
