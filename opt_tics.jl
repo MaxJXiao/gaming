@@ -102,6 +102,32 @@ function score(seq::Int)
 end
 
 
+
+function seq_to_board(seq::Int)
+
+    r_board()
+
+    str = split(string(seq), "")
+    l = length(str)
+
+    for i ∈ 1:l
+
+        if i % 2 == 1
+
+            board[parse(Int, str[i])] = 1
+
+        elseif i % 2 == 0
+
+            board[parse(Int, str[i])] = -1
+
+        end
+
+    end
+
+
+end
+
+
 function seq_gen(board)
     mod = copy(board)
     parity = 1
