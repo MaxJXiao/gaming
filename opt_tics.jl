@@ -315,58 +315,68 @@ function decider(board)
 
     no_r = no_repeats(seq)
     new_seq = []
+    choices = []
 
     if seq == 0
         for i ∈ no_r
             append!(new_seq, parse(Int, string(i) ) )
+            append!(choices, i)
         end
     else
         for i ∈ no_r
             append!(new_seq, parse(Int, string(seq)*string(i) ) )
+            append!(choices, i)
+
         end
     end
 
     l = length(split(string(new_seq[1]), ""), )
     r = length(no_r)
 
+
+
     eval = []
 
 
-    println(l)
 
     for i ∈ 1:r 
         if l == 1
             append!(eval, 0)
         elseif l == 2
-            ind = findall(x -> (x == new_seq[i]), eval₂[:, 1])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₂[:, 1])
             append!(eval, eval₂[ind, 2])
         elseif l == 3
-            ind = findall(x -> (x == new_seq[i]), eval₃[:, 1])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₃[:, 1])
             append!(eval, eval₃[ind, 2])
         elseif l == 4
-            ind = findall(x -> (x == new_seq[i]), eval₄[:, 1])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₄[:, 1])
             append!(eval, eval₄[ind, 2])
         elseif l == 5
-            ind = findall(x -> (x == new_seq[i]), eval₅[:, 1])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₅[:, 1])
             append!(eval, eval₅[ind, 2])
         elseif l == 6
-            ind = findall(x -> (x == new_seq[i]), eval₆[:, 1])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₆[:, 1])
             append!(eval, eval₆[ind, 2])
         elseif l == 7
-            ind = findall(x -> (x == new_seq[i]), eval₇[:, 1])
-            return append!(eval, eval₇[ind, 2])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₇[:, 1])
+            append!(eval, eval₇[ind, 2])
         elseif l == 8
-            ind = findall(x -> (x == new_seq[i]), eval₈[:, 1])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₈[:, 1])
             append!(eval, eval₈[ind, 2])
         elseif l == 9
-            ind = findall(x -> (x == new_seq[i]), eval₉[:, 1])
+            ind = findall(x -> (x == transpose_order(new_seq[i])), eval₉[:, 1])
             append!(eval, eval₉[ind, 2])
         end
     end
 
-    return new_seq, eval
+    return new_seq, choices, eval
 
 end
+
+
+
+
+
 
 
 function prob_dist(vec)
@@ -397,9 +407,37 @@ end
 
 
 
+function transpose_order(seq)
+    s = split(string(seq), "")
+    l = length(s)
+    odds = []
+    evens = []
 
+    for i ∈ 1:l 
+        if i % 2 == 1
+            append!(odds, parse(Int, s[i]))
+        elseif i % 2 == 0
+            append!(evens, parse(Int, s[i]))
+        end
+    end
 
+    re_odd = sort(odds)
+    re_even = sort(evens)
 
+    empty = ""
+
+    for i ∈ 1:l 
+        if i % 2 == 1
+            empty = empty*string(re_odd[Int((i + 1) / 2)])
+        elseif i % 2 == 0
+            empty = empty*string(re_even[Int(i / 2)])
+        end
+    end
+
+    return parse(Int, empty)
+
+    
+end
 
 
 
@@ -476,6 +514,320 @@ function no_repeats(seq)
     return set
     
 end
+
+
+
+
+
+function choosing(board, q_state)
+    if sum(board) == 0
+        _, choice, c_eval = decider(board)
+        max = maximum(c_eval)
+        q_s = []
+        opt = []
+        l = length(c_eval)
+        for i ∈ 1:l
+            if c_eval[i] == max
+                append!(q_s, q_state[choice[i]])
+                append!(opt, choice[i])
+            end
+        end
+
+        
+    elseif sum(board) == 1
+        _, choice, c_eval = decider(board)
+        min = minimum(c_eval)
+        q_s = []
+        opt = []
+        l = length(c_eval)
+        for i ∈ 1:l
+            if c_eval[i] == min
+                append!(q_s, q_state[choice[i]])
+                append!(opt, choice[i])
+            end
+        end
+    end
+
+    return opt[prob_choice(prob_dist(q_s))]
+
+end
+
+
+"""
+oness = 0
+threes = 0
+fives = 0
+eights = 0
+
+
+for i ∈ 1:1000
+    k = choosing(board, q_vecgen(1,1))
+    if k == 1
+        oness += 1
+    elseif k == 3
+        threes += 1
+    elseif k == 5
+        fives += 1
+    elseif k == 8
+        eights += 1
+    end
+
+end
+
+println([oness, threes, fives, eights])
+
+"""
+
+
+
+function rand_xuan(board, turn)
+    ind = []
+    for i ∈ 1:9
+        if board[i] == 0
+            append!(ind, i)
+        end
+    end
+
+    if turn % 2 == 1
+        board[rand(ind)] = 1
+    elseif turn % 2 == 0
+        board[rand(ind)] = -1
+    end
+end
+
+
+function runrandtic(runs, q)
+
+    points = [0.0 0.0]
+
+    for j ∈ 1:runs
+
+        r_board()
+
+
+        if j % 2 == 1
+
+            for i ∈ 1:9
+
+                if i % 2 == 1
+                    board[choosing(board, q)] = 1
+                elseif i % 2 == 0
+                    rand_xuan(board, i)
+                end
+
+                if board_state(board) == 1
+                    if i % 2 == 1
+                        if i == 5
+                            points[1] += 30 #3
+                            break
+                        elseif i == 7
+                            points[1] += 2
+                            break
+                        elseif i == 9
+                            points[1] += 1
+                            break
+                        end
+
+                    elseif i % 2 == 0
+                        points[1] -= 1000
+                        break
+                    end
+
+                end
+
+            end
+
+
+        elseif j % 2 == 0
+
+            for i ∈ 1:9
+
+                if i % 2 == 1
+                    rand_xuan(board, i)
+                elseif i % 2 == 0
+                    board[choosing(board, q)] = -1
+                end
+
+                if board_state(board) == 1
+                    if i % 2 == 1
+                        points[2] -= 1000
+                        break
+                    elseif i % 2 == 0
+                        if i == 6
+                            points[2] += 20 #2
+                            break
+                        elseif i == 8
+                            points[2] += 1
+                            break
+
+                        end
+                    end
+
+                end
+
+            end
+
+        end
+
+
+    end
+
+    return points
+
+end
+
+
+
+function running_rands(block, battles)
+    l = length(block)
+    win_share = []
+
+    for i ∈ 1:l 
+
+        wins = runrandtic(battles, block[i])
+        append!(win_share, sum(wins))
+
+
+    end
+
+    return win_share
+
+end
+
+# [q_vecgen(10, 1) ; q_vecgen(test, 90, 1)] makes 100 vectors
+
+function pokemon_generations(gens, num_vec, α, best, battles)
+
+    winners = []
+
+    scores = []
+
+    first_gen = q_vecgen(num_vec, α)
+
+    results = running_rands(first_gen, battles)
+
+    r = partialsortperm(results, 1:best, rev = true)
+
+    first_winners = first_gen[r]
+
+    append!(winners, [first_winners])
+
+    append!(scores, [results])
+
+    new = first_winners
+    
+
+    for i ∈ 1:(gens-1)
+
+        gen = [q_vecgen(best, 1); q_vecgen(first_winners, num_vec - best, α)]
+
+        g_results = running_rands(gen, battles)
+
+        g_r = partialsortperm(g_results, 1:best, rev = true)
+
+        s_winners = gen[g_r]
+
+        append!(winners, [s_winners])
+
+        append!(scores, [g_results])
+
+        new = copy.(s_winners)
+
+    end
+
+
+    return winners, scores
+
+    
+end
+
+
+α = [0, 0.1, 0.5, 1, 5]
+
+@time begin
+
+    for i ∈ 1:5
+        β = α[i]
+
+        winners, scores = pokemon_generations(10, 25, β, 5, 100)
+
+
+        FileIO.save(joinpath(@__DIR__, "ticcopy", "opt_skew_wins$β.jld2"), "winners$β", winners)
+        FileIO.save(joinpath(@__DIR__, "ticcopy", "opt_skew_scores$β.jld2"), "scores$β", scores)
+
+        println(i)
+    end
+
+end
+
+# pokemon_generations(N, N, _, _, N)
+# pokemon_generations(gens, num_vec, α, best, battles)
+# 2, 20, β, 10, 2 , 4x is 5.2s
+# 10, 100, β, 10, 10, should be ≈ 5 × 125 = 625s
+# 10, 25, β, 5, 100, should be ≈ 5 × 150 = 750s
+
+## skew is when winning on turn 5 or 6 is boosted
+
+
+
+# dinners_0 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_tics_wins0.0.jld2"), "winners0.0")
+# dinners_0_1 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_tics_wins0.1.jld2"), "winners0.1")
+# dinners_0_5 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_tics_wins0.5.jld2"), "winners0.5")
+# dinners_1 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_tics_wins1.0.jld2"), "winners1.0")
+# dinners_5 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_tics_wins5.0.jld2"), "winners5.0")
+
+
+
+dinners_0 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_skew_wins0.0.jld2"), "winners0.0")
+dinners_0_1 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_skew_wins0.1.jld2"), "winners0.1")
+dinners_0_5 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_skew_wins0.5.jld2"), "winners0.5")
+dinners_1 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_skew_wins1.0.jld2"), "winners1.0")
+dinners_5 = FileIO.load(joinpath(@__DIR__, "ticcopy", "opt_skew_wins5.0.jld2"), "winners5.0")
+
+
+
+win_0 = last(dinners_0)[1] # q_state
+
+sco_0 = runrandtic(1000, win_0)
+
+win_0_1 = last(dinners_0_1)[1]
+
+sco_0_1 = runrandtic(1000, win_0_1)
+
+win_0_5 = last(dinners_0_5)[1]
+
+sco_0_5 = runrandtic(1000, win_0_5)
+
+win_1 = last(dinners_1)[1]
+
+sco_1 = runrandtic(1000, win_1)
+
+win_5 = last(dinners_5)[1]
+
+sco_5 = runrandtic(1000, win_5)
+
+ran = q_vecgen(1,1)[1]
+
+sco_rand = runrandtic(1000, ran)
+
+sco = [sum(sco_rand), sum(sco_0), sum(sco_0_1), sum(sco_0_5), sum(sco_1), sum(sco_5)]
+
+display_q(ran)
+
+display_q(win_0)
+
+display_q(win_0_1)
+
+display_q(win_0_5)
+
+display_q(win_1)
+
+display_q(win_5)
+
+
+
+
+
 
 
 function single_deep()
