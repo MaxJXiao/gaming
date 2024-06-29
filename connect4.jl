@@ -267,13 +267,6 @@ end
 
 
 
-
-
-
-
-
-"""
-
 function single_deep()
 
     output = []
@@ -283,6 +276,19 @@ function single_deep()
     end
 
     return output
+    
+end
+function single_deep(seq)
+
+    new_set = no_stacks(seq)
+
+    raw = []
+    for j ∈ new_set
+        append!(raw, [parse(Int, string(seq)*string(j))])
+
+    end
+
+    return transpose_order(raw)
     
 end
 function single_deep(vec)
@@ -308,6 +314,11 @@ function single_deep(vec)
         return transpose_order(raw)
     
 end
+
+
+
+
+"""
 
 
 function completed_games(vec)
