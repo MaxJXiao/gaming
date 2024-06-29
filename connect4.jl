@@ -1,3 +1,7 @@
+using FileIO
+using BenchmarkTools
+
+
 board = zeros(6, 7)
 
 function r_board()
@@ -212,3 +216,191 @@ function seq_gen(board)
 
     
 end
+
+
+function no_stacks()
+    set = Set([1, 2, 3, 4, 5, 6, 7])
+    return set
+end
+function no_stacks(seq)
+    set = Set([1, 2, 3, 4, 5, 6, 7])
+
+
+    str = string(seq, "")
+    l = length(str)
+
+    for i ∈ 1:7
+        count = 0
+        for j ∈ 1:l
+            if i == parse(Int, str[j])
+                count += 1
+            end
+        end
+        if count == 6
+            pop!(set, i)
+        end
+    end
+
+    return set
+    
+end
+
+
+function transpose_order(seq::Int)
+    
+    seq_to_board(seq)
+    return seq_gen(board)
+
+    
+end
+
+function transpose_order(vec::Vector)
+    raw = []
+    for i ∈ vec
+        append!(raw, transpose_order(i))
+    end
+
+    return unique(raw)
+
+    
+end
+
+
+
+
+
+
+
+
+"""
+
+function single_deep()
+
+    output = []
+    for i ∈ 1:7
+        append!(output, [i])
+
+    end
+
+    return output
+    
+end
+function single_deep(vec)
+
+    raw = []
+
+    l = length(vec)
+
+    for i ∈ 1:l
+
+        seq = vec[i]
+
+        new_set = no_stacks(seq)
+
+        for j ∈ new_set
+
+            append!(raw, [parse(Int, string(vec[i])*string(j))])
+
+        end
+
+    end
+
+        return transpose_order(raw)
+    
+end
+
+
+function completed_games(vec)
+    l = length(vec)
+
+    incomplete = []
+    complete = []
+    scores = []
+
+    for i ∈ 1:l
+
+        s = score(vec[i])
+
+        if s == -200
+            append!(incomplete, [vec[i]])
+        else
+            append!(complete, [vec[i]])
+            append!(scores, [s])
+        end
+    end
+
+    return complete, scores, incomplete
+
+    
+end
+
+
+state_1 = single_deep()
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state1.jld2"), "state1", state_1)
+
+state_2 = single_deep(state_1)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state2.jld2"), "state2", state_2)
+
+state_3 = single_deep(state_2)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state3.jld2"), "state3", state_3)
+
+state_4 = single_deep(state_3)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state4.jld2"), "state4", state_4)
+
+state_5 = single_deep(state_4)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state5.jld2"), "state5", state_5)
+
+state_6 = single_deep(state_5)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state6.jld2"), "state6", state_6)
+
+
+
+
+
+s_7 = single_deep(state_6)
+
+state_7 = completed_games(state_7)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state7.jld2"), "state7", state_7)
+
+
+
+s_8 = single_deep(state_7[3])
+
+state_8 = completed_games(s_8)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state8.jld2"), "state8", state_8)
+
+
+
+s_9 = single_deep(state_8[3])
+
+state_9 = completed_games(s_9)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state9.jld2"), "state9", state_9)
+
+
+
+s_10 = single_deep(state_9[3])
+
+state_10 = completed_games(s_10)
+
+FileIO.save(joinpath(@__DIR__, "c4state", "state10.jld2"), "state10", state_10)
+
+
+@time begin
+
+s_11 = single_deep(state_10[3])
+
+end
+
+# 41 seconds
+
+
+"""
