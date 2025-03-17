@@ -1,3 +1,7 @@
+# cd Downloads/chess_png
+# change directory in bash to where you unzipped the folder.
+# make sure you have ffmpeg downloads
+
 # convert images into MP4 video
 
 ffmpeg -i "%10d.png" -c:v libx264 -crf 0 "../movie.mp4"
